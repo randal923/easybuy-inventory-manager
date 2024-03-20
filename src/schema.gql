@@ -1,0 +1,32 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Product {
+  id: Int!
+  type: Int!
+  description: String!
+  barcode: String
+  sku: String!
+  manufacturer: String!
+  groupId: Int!
+  group: String!
+  mainCategoryId: Int!
+  mainCategory: String!
+  unit: String!
+  priceInView: Float!
+  priceOnTerm: Float!
+  highlight: Int!
+  fractioned: Int!
+  packageQuantity: Int!
+  itemUnit: String
+  imageId: Int!
+  imageUrl: String!
+  currentStock: Int!
+  entryForecast: Int!
+  exitForecast: Int!
+}
+
+type Query {
+  products: [Product!]!
+}
