@@ -1,5 +1,5 @@
 import { Resolver, Query } from '@nestjs/graphql'
-import { ProductsService } from './products.service'
+import { ProductsService } from './services/products.service'
 import { Product } from './product.model'
 
 @Resolver(() => Product)
@@ -8,6 +8,6 @@ export class ProductsResolver {
 
   @Query(() => [Product])
   async products() {
-    return this.productsService.findAll()
+    return this.productsService.getAllProducts()
   }
 }

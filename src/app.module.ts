@@ -4,7 +4,14 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { join } from 'path'
 import { ProductsModule } from './products/products.module'
 import { ProductsResolver } from './products/produts.resolver'
-import { ProductsService } from './products/products.service'
+import { ProductsService } from './products/services/products.service'
+import { ApolloClientModule } from './apollo/apollo-client.module'
+import { ScheduleModule } from '@nestjs/schedule'
+import { GraphQLService } from './graphql/graphql.service'
+import { SchedulerService } from './scheduler/scheduler.service'
+import { HttpService } from './http/http.service'
+import { PrismaService } from './prisma/prisma.service'
+import { ShopifyService } from './shopify/shopify.service'
 
 @Module({
   imports: [
@@ -13,8 +20,18 @@ import { ProductsService } from './products/products.service'
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
     }),
     ProductsModule,
+    ApolloClientModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
-  providers: [ProductsService, ProductsResolver],
+  providers: [
+    ProductsService,
+    ProductsResolver,
+    GraphQLService,
+    SchedulerService,
+    HttpService,
+    PrismaService,
+    ShopifyService,
+  ],
 })
 export class AppModule {}
