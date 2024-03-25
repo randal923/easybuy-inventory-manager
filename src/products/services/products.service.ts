@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
-import { Product } from '@prisma/client'
+import { ProductWithoutId } from 'src/@types/prisma'
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async upsertProduct(productData: Product[]) {
+  async upsertProduct(productData: ProductWithoutId[]) {
     for (const product of productData) {
       await this.prisma.upsertProduct(product)
     }

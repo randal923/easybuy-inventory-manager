@@ -7,7 +7,6 @@ export const fetchProductsQuery = gql`
         node {
           id
           title
-          tags
           totalInventory
           tracksInventory
           variants(first: 100) {
@@ -19,6 +18,14 @@ export const fetchProductsQuery = gql`
                 sku
                 inventoryItem {
                   id
+                }
+                metafields(first: 20) {
+                  edges {
+                    node {
+                      key
+                      value
+                    }
+                  }
                 }
               }
             }

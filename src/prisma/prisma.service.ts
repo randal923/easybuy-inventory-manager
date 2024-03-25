@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
 import { PrismaClient, Product } from '@prisma/client'
+import { ProductWithoutId } from 'src/@types/prisma'
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -33,7 +34,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     )
   }
 
-  async upsertProduct(productData: Product) {
+  async upsertProduct(productData: ProductWithoutId) {
     return this.prisma.product.upsert({
       where: { sku: productData.sku as any },
       update: {

@@ -14,28 +14,14 @@ datasource db {
 }
 
 model Product {
-  id                Int      @id @default(autoincrement())
-  type              Int?
-  description       String?
-  barcode           String?  // Allows null values
-  sku               String    @unique
-  manufacturer      String?
-  groupId           Int?
-  group             String?
-  mainCategoryId    Int?
-  mainCategory      String?
-  unit              String
-  priceInView       Float
-  priceOnTerm       Float
-  highlight         Int?
-  fractioned        Int?
-  packageQuantity   Int
-  itemUnit          String?  // Allows null values
-  imageId           Int?
-  imageUrl          String?
-  currentStock      Int
-  entryForecast     Int?
-  exitForecast      Int?
+  id                  Int      @id @default(autoincrement())
+  sku                 String    @unique
+  packageQuantity     Int
+  currentStock        Int
+  fractionedQuantity  Int?
+  isFractioned        Boolean?
+  isZap               Boolean?
+  isPanebras          Boolean?
 
   @@map("products") // Maps the model to the "products" table in your database
 }

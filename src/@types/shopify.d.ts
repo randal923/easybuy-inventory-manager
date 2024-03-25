@@ -39,4 +39,16 @@ interface VariantNode {
   inventoryItem: {
     id: string
   }
+  metafields: {
+    edges: MetafieldEdge[]
+  }
+}
+
+interface MetafieldEdge {
+  node: MetafieldNode
+}
+
+interface MetafieldNode {
+  key: string
+  value: string
 }

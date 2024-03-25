@@ -6,6 +6,7 @@ import { BOA_GESTAO_INVENTORY_URL, BOA_GESTAO_PRODUCTS_URL } from '../constants/
 import { mergeProductsAndInventory } from '../utils/boa-gestao'
 import { ProductsService } from 'src/products/services/products.service'
 import { ShopifyService } from 'src/shopify/shopify.service'
+import { MergedProduct } from 'src/@types/prisma'
 
 @Injectable()
 export class SchedulerService {
@@ -16,9 +17,9 @@ export class SchedulerService {
     private readonly shopifyService: ShopifyService,
   ) {}
 
-  @Interval(10000)
+  @Interval(100000000)
   async handleInterval() {
-    console.log('Fetching products...')
+    console.info('Fetching products...')
     const headers = {
       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
     }
@@ -32,7 +33,11 @@ export class SchedulerService {
 
     // Filter products by SKU for testing purposes
     const filteredProducts = boaGestaoProducts.data.rows.filter(
-      (product) => product.SKU === 'ECT24 glow' || product.SKU === 'ECL24 ELITE glow',
+      (product) =>
+        product.SKU === 'ECT24 glow' ||
+        product.SKU === 'ECL24 ELITE glow' ||
+        product.SKU === '25501' ||
+        product.SKU === '25500',
     )
 
     const boaGestaoInventory = await this.httpService.get<BoaGestaoInventoryResponse>(
@@ -42,14 +47,18 @@ export class SchedulerService {
       },
     )
 
+    const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
+
     const mergedProducts = mergeProductsAndInventory({
       products: filteredProducts,
       inventoryRows: boaGestaoInventory.data.rows,
+      shopifyProductVariants: shopifyProductVariants,
     })
 
     await this.productsService.upsertProduct(mergedProducts)
     await this.shopifyService.updateStockLevels(
-      mergedProducts as unknown as MergedBoaGestaoProduct[],
+      mergedProducts as unknown as MergedProduct[],
+      shopifyProductVariants,
     )
   }
 }

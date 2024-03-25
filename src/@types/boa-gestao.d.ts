@@ -44,27 +44,3 @@ interface BoaGestaoInventoryItem {
   PrevisaoEntrada: number | null
   PrevisaoSaida: number | null
 }
-
-interface MergedBoaGestaoProduct {
-  type: number
-  description: string
-  barcode: string
-  sku: string | null
-  manufacturer: string
-  groupId: number | null
-  group: string | null
-  mainCategoryId: number | null
-  mainCategory: string | null
-  unit: string
-  priceInView: number
-  priceOnTerm: number
-  highlight: number
-  fractioned: number
-  packageQuantity: number
-  itemUnit: string | null
-  imageId: number | null
-  imageUrl: string | null
-  currentStock: number
-  entryForecast: number | null
-  exitForecast: number | null
-}
