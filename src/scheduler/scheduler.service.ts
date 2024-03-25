@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { Interval } from '@nestjs/schedule'
-import { GraphQLService } from '../graphql/graphql.service'
 import { HttpService } from '../http/http.service'
 import { BOA_GESTAO_INVENTORY_URL, BOA_GESTAO_PRODUCTS_URL } from '../constants/boa-gestao-urls'
 import { mergeProductsAndInventory } from '../utils/boa-gestao'
@@ -11,7 +10,6 @@ import { MergedProduct } from 'src/@types/prisma'
 @Injectable()
 export class SchedulerService {
   constructor(
-    private readonly graphQLService: GraphQLService,
     private readonly httpService: HttpService,
     private readonly productsService: ProductsService,
     private readonly shopifyService: ShopifyService,

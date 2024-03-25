@@ -1,7 +1,7 @@
 import { ApolloClient } from '@apollo/client/core'
 import { Inject, Injectable } from '@nestjs/common'
 import { MergedProduct } from 'src/@types/prisma'
-import { fetchProductsQuery, productQuantityMutation } from 'src/graphql/queries/products'
+import { fetchProductsQuery, productQuantityMutation } from 'src/shopify/queries/products'
 
 @Injectable()
 export class ShopifyService {

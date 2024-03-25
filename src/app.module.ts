@@ -7,7 +7,6 @@ import { ProductsResolver } from './products/produts.resolver'
 import { ProductsService } from './products/services/products.service'
 import { ApolloClientModule } from './apollo/apollo-client.module'
 import { ScheduleModule } from '@nestjs/schedule'
-import { GraphQLService } from './graphql/graphql.service'
 import { SchedulerService } from './scheduler/scheduler.service'
 import { HttpService } from './http/http.service'
 import { PrismaService } from './prisma/prisma.service'
@@ -27,7 +26,6 @@ import { ShopifyService } from './shopify/shopify.service'
   providers: [
     ProductsService,
     ProductsResolver,
-    GraphQLService,
     SchedulerService,
     HttpService,
     PrismaService,
