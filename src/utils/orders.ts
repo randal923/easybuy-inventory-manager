@@ -1,6 +1,6 @@
-import { Items, Order } from 'src/orders/models/order.model'
+import { ItemsInput, OrderInput } from 'src/orders/dtos/boa-gestao-order-input.dto'
 
-export function translateOrderToPortuguese(order: Order): PortugueseOrder {
+export function translateOrderToPortuguese(order: OrderInput): PortugueseOrder {
   return {
     DataHora: order.dateTime,
     ClienteId: order.clientId,
@@ -10,7 +10,7 @@ export function translateOrderToPortuguese(order: Order): PortugueseOrder {
   }
 }
 
-export function translateOrderItemToPortuguese(item: Items): PortugueseItem {
+export function translateOrderItemToPortuguese(item: ItemsInput): PortugueseItem {
   return {
     ProdutoId: item.productId,
     Unidade: item.unity,

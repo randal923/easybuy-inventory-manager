@@ -1,5 +1,5 @@
 interface PortugueseOrder {
-  DataHora: Date
+  DataHora: string
   ClienteId: number
   TotalProdutos: number
   Total: number
@@ -7,7 +7,7 @@ interface PortugueseOrder {
 }
 
 interface PortugueseItem {
-  ProdutoId: string
+  ProdutoId: number
   Unidade: string
   Quantidade: number
   ValorUnitario: number

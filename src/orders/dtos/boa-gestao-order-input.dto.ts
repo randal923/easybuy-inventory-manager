@@ -3,8 +3,8 @@ import { IsString, IsInt, IsNumber } from 'class-validator'
 
 @InputType()
 export class OrderInput {
-  @Field(() => Date)
-  dateTime: Date
+  @Field(() => String)
+  dateTime: string
 
   @Field(() => Int)
   clientId: number
@@ -21,9 +21,9 @@ export class OrderInput {
 
 @InputType()
 export class ItemsInput {
-  @Field(() => String)
-  @IsString()
-  productId: string
+  @Field(() => Int)
+  @IsInt()
+  productId: number
 
   @Field(() => String)
   @IsString()

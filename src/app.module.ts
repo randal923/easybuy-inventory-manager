@@ -14,6 +14,7 @@ import { ShopifyService } from './shopify/shopify.service'
 import { OrdersModule } from './orders/orders.module'
 import { BoagestaoService } from './boagestao/boagestao.service'
 import { BoagestaoModule } from './boagestao/boagestao.module'
+import { OrdersResolver } from './orders/orders.resolver'
 import { OrdersService } from './orders/orders.service'
 
 @Module({
@@ -32,6 +33,8 @@ import { OrdersService } from './orders/orders.service'
   providers: [
     ProductsService,
     ProductsResolver,
+    OrdersResolver,
+    OrdersService,
     SchedulerService,
     HttpService,
     PrismaService,

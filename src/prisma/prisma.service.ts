@@ -51,4 +51,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       where: { sku },
     })
   }
+
+  async findProductsBySkus(skus: string[]): Promise<Product[]> {
+    return this.product.findMany({
+      where: {
+        sku: {
+          in: skus,
+        },
+      },
+    })
+  }
 }
