@@ -11,6 +11,10 @@ import { SchedulerService } from './scheduler/scheduler.service'
 import { HttpService } from './http/http.service'
 import { PrismaService } from './prisma/prisma.service'
 import { ShopifyService } from './shopify/shopify.service'
+import { OrdersModule } from './orders/orders.module'
+import { BoagestaoService } from './boagestao/boagestao.service'
+import { BoagestaoModule } from './boagestao/boagestao.module'
+import { OrdersService } from './orders/orders.service'
 
 @Module({
   imports: [
@@ -21,6 +25,8 @@ import { ShopifyService } from './shopify/shopify.service'
     ProductsModule,
     ApolloClientModule,
     ScheduleModule.forRoot(),
+    OrdersModule,
+    BoagestaoModule,
   ],
   controllers: [],
   providers: [
@@ -30,6 +36,7 @@ import { ShopifyService } from './shopify/shopify.service'
     HttpService,
     PrismaService,
     ShopifyService,
+    BoagestaoService,
   ],
 })
 export class AppModule {}

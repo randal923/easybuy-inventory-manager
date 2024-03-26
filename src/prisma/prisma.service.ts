@@ -45,4 +45,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       },
     })
   }
+
+  async findProductBySku(sku: string) {
+    return this.prisma.product.findUnique({
+      where: { sku },
+    })
+  }
 }

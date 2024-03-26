@@ -25,3 +25,25 @@ model Product {
 
   @@map("products") // Maps the model to the "products" table in your database
 }
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  dateTime      DateTime
+  clientId      Int
+  totalProducts Float
+  total         Float
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  productId  String
+  sku        String
+  unity      String
+  quantity   Int
+  unityPrice Float
+  totalItem  Float
+  total      Float
+  orderId    Int
+  order      Order   @relation(fields: [orderId], references: [id])
+}
