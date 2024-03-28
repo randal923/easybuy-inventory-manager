@@ -27,24 +27,17 @@ type Product {
   exitForecast: Int!
 }
 
-type Order {
-  dateTime: DateTime!
-  clientId: Int!
-  totalProducts: Float!
-  total: Float!
+type PlaceOrderResponseDto {
+  iat: String!
+  id: String!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type Query {
   products: [Product!]!
 }
 
 type Mutation {
-  placeOrder(orderInput: ShopifyOrderInput!): Order!
+  placeOrder(shopifyOrderInput: ShopifyOrderInput!): PlaceOrderResponseDto!
 }
 
 input ShopifyOrderInput {
@@ -54,4 +47,5 @@ input ShopifyOrderInput {
 input ShopifyProductInput {
   sku: String!
   quantity: Int!
+  isFractioned: Boolean!
 }

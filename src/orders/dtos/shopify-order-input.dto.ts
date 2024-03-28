@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql'
-import { IsInt, IsString } from 'class-validator'
+import { IsBoolean, IsInt, IsString } from 'class-validator'
 
 @InputType()
 export class ShopifyOrderInput {
@@ -16,4 +16,8 @@ export class ShopifyProductInput {
   @Field(() => Int)
   @IsInt()
   quantity: number
+
+  @Field(() => Boolean)
+  @IsBoolean()
+  isFractioned: boolean
 }

@@ -3,7 +3,7 @@ import { HttpService } from 'src/http/http.service'
 import { OrderInput } from 'src/orders/dtos/boa-gestao-order-input.dto'
 import { translateOrderToPortuguese } from 'src/utils/orders'
 
-interface OrderResponse {
+export interface OrderResponse {
   id: string
 }
 
