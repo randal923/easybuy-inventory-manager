@@ -9,8 +9,6 @@ export interface OrderResponse {
 
 @Injectable()
 export class BoagestaoService {
-  productsUrl = 'https://boagestao.app/api/produtos'
-
   constructor(private readonly httpService: HttpService) {}
 
   async placeOrder(orderInput: OrderInput): Promise<OrderResponse> {
@@ -32,11 +30,13 @@ export class BoagestaoService {
   }
 
   async findProductsBySkus(skus: string[]): Promise<BoaGestaoProduct[]> {
+    const productsUrl = 'https://boagestao.app/api/produtos'
+
     const headers = {
       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
     }
 
-    const products = await this.httpService.get<BoaGestaoProductsResponse>(this.productsUrl, {
+    const products = await this.httpService.get<BoaGestaoProductsResponse>(productsUrl, {
       headers,
     })
 

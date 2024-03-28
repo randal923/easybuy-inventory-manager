@@ -17,6 +17,8 @@ model Product {
   id                  Int      @id @default(autoincrement())
   sku                 String    @unique
   packageQuantity     Int
+  shopifyCurrentStock Int?
+  inventoryItemId     String?
   currentStock        Int
   fractionedQuantity  Int?
   isFractioned        Boolean?

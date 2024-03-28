@@ -1,42 +1,66 @@
 import { ProductWithoutId } from 'src/@types/prisma'
 
 interface MergeProductsAndInventory {
-  products: BoaGestaoProduct[]
-  inventoryRows: BoaGestaoInventoryItem[]
+  boaGestaoProducts: BoaGestaoProduct[]
+  boaGestaoInventoryRows: BoaGestaoInventoryItem[]
   shopifyProductVariants: VariantNode[]
 }
 
 export const mergeProductsAndInventory = (
   params: MergeProductsAndInventory,
 ): ProductWithoutId[] => {
-  const { products, inventoryRows, shopifyProductVariants } = params
+  const { boaGestaoProducts, boaGestaoInventoryRows, shopifyProductVariants } = params
 
   const mergedProducts: ProductWithoutId[] = []
 
-  for (const product of products) {
-    const variant = shopifyProductVariants.find((variant) => variant.sku === product.SKU)
-    const inventory = inventoryRows.find((inv) => inv.ProdutoId === product.Id)
+  for (const boaGestaoProduct of boaGestaoProducts) {
+    const shopifyVariants = shopifyProductVariants.filter((variant) => {
+      const cleanedSku = variant.sku ? variant.sku.replace('EB', '') : null
+      return (
+        variant.sku === boaGestaoProduct.SKU || (cleanedSku && cleanedSku === boaGestaoProduct.SKU)
+      )
+    })
 
-    if (!inventory) return
+    const boaGestaoInventoryItem = boaGestaoInventoryRows.find(
+      (inv) => inv.ProdutoId === boaGestaoProduct.Id,
+    )
 
-    const getMetafield = (key: string) =>
-      Boolean(variant.metafields.edges.find((metafield) => metafield.node.key === key).node?.value)
-
-    const isFractioned = getMetafield('isfractioned')
-    const isZap = getMetafield('iszap')
-    const isPanebras = getMetafield('ispanebras')
-
-    const baseProduct: ProductWithoutId = {
-      sku: product.SKU,
-      packageQuantity: product.QuantidadePacote,
-      currentStock: inventory.EstoqueAtual,
-      isFractioned: isFractioned,
-      isZap: isZap,
-      isPanebras: isPanebras,
-      fractionedQuantity: null,
+    if (!boaGestaoInventoryItem) {
+      console.error(`Inventory not found for product ${boaGestaoProduct.SKU}`)
+      continue
     }
 
-    mergedProducts.push(baseProduct)
+    shopifyVariants.forEach((variant) => {
+      const getMetafield = (key: string) => {
+        const metafieldEdge = variant.metafields.edges.find(
+          (metafield) => metafield.node.key === key,
+        )
+        if (metafieldEdge) {
+          return metafieldEdge.node.value === 'true'
+        }
+        return false
+      }
+
+      const isFractioned = getMetafield('isfractioned')
+      const isZap = getMetafield('iszap')
+      const isPanebras = getMetafield('ispanebras')
+
+      const productVariant: ProductWithoutId = {
+        sku: variant.sku,
+        packageQuantity: boaGestaoProduct.QuantidadePacote,
+        currentStock: boaGestaoInventoryItem.EstoqueAtual,
+        shopifyCurrentStock: variant.inventoryQuantity,
+        inventoryItemId: variant.inventoryItem.id,
+        isFractioned,
+        isZap,
+        isPanebras,
+        fractionedQuantity: isFractioned
+          ? boaGestaoInventoryItem.EstoqueAtual * boaGestaoProduct.QuantidadePacote
+          : null,
+      }
+
+      mergedProducts.push(productVariant)
+    })
   }
 
   return mergedProducts
