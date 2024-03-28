@@ -14,7 +14,7 @@ export class SchedulerService {
     private readonly shopifyService: ShopifyService,
   ) {}
 
-  @Interval(10000)
+  @Interval(60000)
   async handleInterval() {
     console.info('Fetching products...')
     const headers = {
@@ -45,6 +45,7 @@ export class SchedulerService {
     )
 
     const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
+
     const mergedProducts = mergeProductsAndInventory({
       boaGestaoProducts: filteredProducts,
       boaGestaoInventoryRows: boaGestaoInventory.data.rows,

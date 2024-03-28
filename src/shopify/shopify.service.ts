@@ -9,14 +9,17 @@ export class ShopifyService {
 
   async updateStockLevels(mergedProducts: MergedProduct[]) {
     for (const mergedProduct of mergedProducts) {
-      const { isFractioned, inventoryItemId, currentStock, shopifyCurrentStock } = mergedProduct
+      const { isFractioned, inventoryItemId, boaGestaoCurrentStock, shopifyCurrentStock } =
+        mergedProduct
 
       const delta = () => {
         if (isFractioned) {
-          return Math.round(currentStock * mergedProduct.packageQuantity - shopifyCurrentStock)
+          return Math.round(
+            boaGestaoCurrentStock * mergedProduct.packageQuantity - shopifyCurrentStock,
+          )
         }
 
-        return Math.round(currentStock - shopifyCurrentStock)
+        return Math.round(boaGestaoCurrentStock - shopifyCurrentStock)
       }
 
       await this.apolloClient.mutate({

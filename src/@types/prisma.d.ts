@@ -7,7 +7,7 @@ interface MergedProduct {
   fractionedQuantity: number
   shopifyCurrentStock: number
   inventoryItemId: string
-  currentStock: number
+  boaGestaoCurrentStock: number
   isFractioned: boolean
   isZap: boolean
   isPanebras: boolean

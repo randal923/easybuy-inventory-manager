@@ -14,16 +14,16 @@ datasource db {
 }
 
 model Product {
-  id                  Int      @id @default(autoincrement())
-  sku                 String    @unique
-  packageQuantity     Int
-  shopifyCurrentStock Int?
-  inventoryItemId     String?
-  currentStock        Int
-  fractionedQuantity  Int?
-  isFractioned        Boolean?
-  isZap               Boolean?
-  isPanebras          Boolean?
+  id                      Int      @id @default(autoincrement())
+  sku                     String    @unique
+  packageQuantity         Int
+  shopifyCurrentStock     Int?
+  boaGestaoCurrentStock   Int?
+  fractionedQuantity      Int?
+  inventoryItemId         String?
+  isFractioned            Boolean?
+  isZap                   Boolean?
+  isPanebras              Boolean?
 
   @@map("products") // Maps the model to the "products" table in your database
 }

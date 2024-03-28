@@ -48,15 +48,13 @@ export const mergeProductsAndInventory = (
       const productVariant: ProductWithoutId = {
         sku: variant.sku,
         packageQuantity: boaGestaoProduct.QuantidadePacote,
-        currentStock: boaGestaoInventoryItem.EstoqueAtual,
+        boaGestaoCurrentStock: boaGestaoInventoryItem.EstoqueAtual,
         shopifyCurrentStock: variant.inventoryQuantity,
         inventoryItemId: variant.inventoryItem.id,
         isFractioned,
         isZap,
         isPanebras,
-        fractionedQuantity: isFractioned
-          ? boaGestaoInventoryItem.EstoqueAtual * boaGestaoProduct.QuantidadePacote
-          : null,
+        fractionedQuantity: null,
       }
 
       mergedProducts.push(productVariant)
