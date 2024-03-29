@@ -14,6 +14,7 @@ export class BoagestaoService {
   async placeOrder(orderInput: OrderInput): Promise<OrderResponse> {
     const orderUrl = 'https://boagestao.app/api/pedido'
 
+    console.log('orderInput', orderInput)
     const headers = {
       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
     }
@@ -40,7 +41,8 @@ export class BoagestaoService {
       headers,
     })
 
-    const skusSet = new Set(skus)
+    const normalizedSkus = skus.map((sku) => (sku.startsWith('EB') ? sku.substring(2) : sku))
+    const skusSet = new Set(normalizedSkus)
     const filteredProducts = products.data.rows.filter((product) => skusSet.has(product.SKU))
 
     return filteredProducts

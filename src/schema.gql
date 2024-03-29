@@ -28,8 +28,10 @@ type Product {
 }
 
 type PlaceOrderResponseDto {
-  iat: String!
-  id: String!
+  iat: String
+  id: String
+  status: Int
+  message: String
 }
 
 type Query {

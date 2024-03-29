@@ -1,10 +1,16 @@
-import { Field, ObjectType } from '@nestjs/graphql'
+import { Field, Int, ObjectType } from '@nestjs/graphql'
 
 @ObjectType()
 export class PlaceOrderResponseDto {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   iat: string
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   id: string
+
+  @Field(() => Int, { nullable: true })
+  status: number
+
+  @Field(() => String, { nullable: true })
+  message: string
 }
