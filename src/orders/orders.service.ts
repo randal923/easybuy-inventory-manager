@@ -25,7 +25,6 @@ export class OrdersService {
 
     const response = await this.boaGestaoService.placeOrder(orderInput)
 
-    console.log('response', response)
     return response
   }
 
@@ -44,14 +43,12 @@ export class OrdersService {
 
       if (!shopifyOrder) return null
 
-      console.log('shopifyOrder', shopifyOrder)
       const totalItem = shopifyOrder.quantity * boaGestaoProduct.PrecoVista
       const isFractioned = shopifyOrder.isFractioned
       const productInDb = await this.prismaService.findProductBySku(shopifyOrder.sku)
       const thereIsAnOpenBoxInStock = productInDb.fractionedQuantity > 0
       const isFractionedQuantityEnough = productInDb.fractionedQuantity >= shopifyOrder.quantity
 
-      console.log('productInDb.fractionedQuantity', productInDb.fractionedQuantity)
       if (isFractioned && thereIsAnOpenBoxInStock && isFractionedQuantityEnough) {
         await this.prismaService.updateProductFractionedQuantity({
           sku: shopifyOrder.sku,
@@ -128,7 +125,6 @@ export class OrdersService {
       totalProducts += shopifyOrder.quantity
       total += totalItem
 
-      console.log('returning item')
       return {
         productId: boaGestaoProduct.Id,
         sku: boaGestaoProduct.SKU || '',
@@ -140,11 +136,8 @@ export class OrdersService {
       }
     })
 
-    console.log('items', items)
-
     const finishedItems = (await Promise.all(items)).filter((item) => item !== null)
 
-    console.log('finishedItems', finishedItems)
     const orderInput = {
       dateTime,
       clientId,

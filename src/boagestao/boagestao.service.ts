@@ -14,7 +14,6 @@ export class BoagestaoService {
   async placeOrder(orderInput: OrderInput): Promise<OrderResponse> {
     const orderUrl = 'https://boagestao.app/api/pedido'
 
-    console.log('orderInput', orderInput)
     const headers = {
       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
     }
