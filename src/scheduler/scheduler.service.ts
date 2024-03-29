@@ -14,7 +14,7 @@ export class SchedulerService {
     private readonly shopifyService: ShopifyService,
   ) {}
 
-  @Interval(10000000)
+  @Interval(10000)
   async handleInterval() {
     console.info('Fetching products...')
     const headers = {

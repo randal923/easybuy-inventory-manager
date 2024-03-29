@@ -54,7 +54,6 @@ export const mergeProductsAndInventory = (
         isFractioned,
         isZap,
         isPanebras,
-        fractionedQuantity: null,
       }
 
       mergedProducts.push(productVariant)

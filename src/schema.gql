@@ -34,8 +34,14 @@ type PlaceOrderResponseDto {
   message: String
 }
 
+type FeedDatabaseResponseDto {
+  status: Float!
+  message: String!
+}
+
 type Query {
   products: [Product!]!
+  feedDatabase: FeedDatabaseResponseDto!
 }
 
 type Mutation {
