@@ -1,6 +1,11 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
 import { PrismaClient, Product } from '@prisma/client'
-import { ProductWithoutId } from 'src/@types/prisma'
+import {
+  ProductWithoutId,
+  UpdateBoaGestaoCurrentStock,
+  UpdateProductFractionedQuantity,
+  UpdateShopifyCurrentStock,
+} from 'src/@types/prisma'
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -46,10 +51,25 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     })
   }
 
-  async updateProductFractionedQuantity(sku: string, fractionedQuantity: number) {
+  async updateProductFractionedQuantity(params: UpdateProductFractionedQuantity) {
+    const { sku, fractionedQuantity } = params
     return this.product.update({
       where: { sku },
       data: { fractionedQuantity },
+    })
+  }
+
+  async updateShopifyCurrentStock({ sku, shopifyCurrentStock }: UpdateShopifyCurrentStock) {
+    return this.product.update({
+      where: { sku },
+      data: { shopifyCurrentStock },
+    })
+  }
+
+  async updateBoaGestaoCurrentStock({ sku, boaGestaoCurrentStock }: UpdateBoaGestaoCurrentStock) {
+    return this.product.update({
+      where: { sku },
+      data: { boaGestaoCurrentStock },
     })
   }
 

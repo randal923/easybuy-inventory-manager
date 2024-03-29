@@ -12,3 +12,16 @@ interface MergedProduct {
   isZap: boolean
   isPanebras: boolean
 }
+
+interface UpdateProductFractionedQuantity {
+  sku: string
+  fractionedQuantity: number
+}
+interface UpdateShopifyCurrentStock {
+  sku: string
+  shopifyCurrentStock: number
+}
+interface UpdateBoaGestaoCurrentStock {
+  sku: string
+  boaGestaoCurrentStock: number
+}

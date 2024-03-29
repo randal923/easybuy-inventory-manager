@@ -35,19 +35,34 @@ export class OrdersService {
       const thereIsAnOpenBoxInStock = productInDb.fractionedQuantity > 0
 
       if (isFractioned && thereIsAnOpenBoxInStock) {
-        await this.prismaService.updateProductFractionedQuantity(
-          boaGestaoProduct.SKU,
-          productInDb.fractionedQuantity - shopifyOrder.quantity,
-        )
+        await this.prismaService.updateProductFractionedQuantity({
+          sku: boaGestaoProduct.SKU,
+          fractionedQuantity: productInDb.fractionedQuantity - shopifyOrder.quantity,
+        })
+
+        await this.prismaService.updateShopifyCurrentStock({
+          sku: boaGestaoProduct.SKU,
+          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyOrder.quantity,
+        })
 
         return
       }
 
       if (isFractioned && !thereIsAnOpenBoxInStock) {
-        await this.prismaService.updateProductFractionedQuantity(
-          boaGestaoProduct.SKU,
-          boaGestaoProduct.QuantidadePacote - shopifyOrder.quantity,
-        )
+        await this.prismaService.updateProductFractionedQuantity({
+          sku: boaGestaoProduct.SKU,
+          fractionedQuantity: boaGestaoProduct.QuantidadePacote - shopifyOrder.quantity,
+        })
+
+        await this.prismaService.updateShopifyCurrentStock({
+          sku: boaGestaoProduct.SKU,
+          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyOrder.quantity,
+        })
+
+        await this.prismaService.updateBoaGestaoCurrentStock({
+          sku: boaGestaoProduct.SKU,
+          boaGestaoCurrentStock: productInDb.boaGestaoCurrentStock - shopifyOrder.quantity,
+        })
       }
 
       totalProducts += shopifyOrder.quantity
