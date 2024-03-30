@@ -16,6 +16,7 @@ export class OrdersService {
     const boaGestaoProducts = await this.boaGestaoService.findProductsBySkus(skus)
 
     const orderInput = await this.getOrderInput(boaGestaoProducts, shopifyOrderInput)
+
     if (orderInput.items.length === 0) {
       return {
         status: 200,
@@ -31,42 +32,52 @@ export class OrdersService {
   async getOrderInput(boaGestaoProducts: BoaGestaoProduct[], shopifyOrderInput: ShopifyOrderInput) {
     const dateTime = new Date().toISOString()
     const clientId = 26
-    let totalProducts = 0
-    let total = 0
+    const items = await this.getOrderItems(boaGestaoProducts, shopifyOrderInput)
+    const total = items.reduce((acc, item) => acc + item.total, 0)
 
+    const orderInput = {
+      dateTime,
+      clientId,
+      totalProducts: total,
+      total,
+      items,
+    }
+
+    return orderInput
+  }
+
+  async getOrderItems(boaGestaoProducts: BoaGestaoProduct[], shopifyOrderInput: ShopifyOrderInput) {
     const matchSkuWithBoaGestao = (sku: string) => (sku.startsWith('EB') ? sku.substring(2) : sku)
 
     const items = boaGestaoProducts.map(async (boaGestaoProduct): Promise<ItemsInput> => {
-      const shopifyOrder = shopifyOrderInput.products.find(
+      const shopifyProduct = shopifyOrderInput.products.find(
         (product) => matchSkuWithBoaGestao(product.sku) === boaGestaoProduct.SKU,
       )
 
-      if (!shopifyOrder) return null
+      if (!shopifyProduct) return null
 
-      const totalItem = shopifyOrder.quantity * boaGestaoProduct.PrecoVista
-      const isFractioned = shopifyOrder.isFractioned
-      const productInDb = await this.prismaService.findProductBySku(shopifyOrder.sku)
+      const totalItem = shopifyProduct.quantity * boaGestaoProduct.PrecoVista
+      const isFractioned = shopifyProduct.isFractioned
+      const productInDb = await this.prismaService.findProductBySku(shopifyProduct.sku)
       const thereIsAnOpenBoxInStock = productInDb.fractionedQuantity > 0
-      const isFractionedQuantityEnough = productInDb.fractionedQuantity >= shopifyOrder.quantity
-      const isFractionedQuantityEqualToBoxQuantity =
-        boaGestaoProduct.QuantidadePacote === shopifyOrder.quantity
+      const isFractionedQuantityEnough = productInDb.fractionedQuantity >= shopifyProduct.quantity
 
       if (isFractioned && thereIsAnOpenBoxInStock && isFractionedQuantityEnough) {
         await this.prismaService.updateProductFractionedQuantity({
-          sku: shopifyOrder.sku,
-          fractionedQuantity: productInDb.fractionedQuantity - shopifyOrder.quantity,
+          sku: shopifyProduct.sku,
+          fractionedQuantity: productInDb.fractionedQuantity - shopifyProduct.quantity,
         })
 
         await this.prismaService.updateShopifyCurrentStock({
-          sku: shopifyOrder.sku,
-          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyOrder.quantity,
+          sku: shopifyProduct.sku,
+          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyProduct.quantity,
         })
 
         return null
       }
 
       if (isFractioned && thereIsAnOpenBoxInStock && !isFractionedQuantityEnough) {
-        let quantityNeeded = shopifyOrder.quantity - (productInDb.fractionedQuantity ?? 0)
+        let quantityNeeded = shopifyProduct.quantity - (productInDb.fractionedQuantity ?? 0)
         let boxesNeeded = 0
         while (quantityNeeded > 0) {
           quantityNeeded = quantityNeeded - boaGestaoProduct.QuantidadePacote
@@ -74,54 +85,15 @@ export class OrdersService {
         }
         quantityNeeded = Math.abs(quantityNeeded)
         await this.prismaService.updateProductFractionedQuantity({
-          sku: shopifyOrder.sku,
+          sku: shopifyProduct.sku,
           fractionedQuantity: quantityNeeded,
         })
         await this.prismaService.updateShopifyCurrentStock({
-          sku: shopifyOrder.sku,
-          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyOrder.quantity,
+          sku: shopifyProduct.sku,
+          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyProduct.quantity,
         })
         await this.prismaService.updateBoaGestaoCurrentStock({
-          sku: shopifyOrder.sku,
-          boaGestaoCurrentStock: productInDb.boaGestaoCurrentStock - boxesNeeded,
-        })
-
-        return {
-          productId: boaGestaoProduct.Id,
-          sku: boaGestaoProduct.SKU || '',
-          unity: boaGestaoProduct.Unidade,
-          quantity: productInDb.fractionedQuantity,
-          unityPrice: boaGestaoProduct.PrecoVista,
-          totalItem: productInDb.fractionedQuantity * boaGestaoProduct.PrecoVista,
-          total: productInDb.fractionedQuantity * boaGestaoProduct.PrecoVista,
-        }
-      }
-
-      if (isFractioned && !thereIsAnOpenBoxInStock) {
-        let quantityNeeded = shopifyOrder.quantity - (productInDb.fractionedQuantity ?? 0)
-        console.log('quantityNeeded', quantityNeeded)
-        let boxesNeeded = 0
-        while (quantityNeeded > 0) {
-          quantityNeeded = quantityNeeded - boaGestaoProduct.QuantidadePacote
-          boxesNeeded++
-        }
-        console.log('boxesNeeded', boxesNeeded)
-        quantityNeeded = Math.abs(quantityNeeded)
-
-        await this.prismaService.updateProductFractionedQuantity({
-          sku: shopifyOrder.sku,
-          fractionedQuantity:
-            boaGestaoProduct.QuantidadePacote * boxesNeeded -
-            (shopifyOrder.quantity - (productInDb.fractionedQuantity ?? 0)),
-        })
-
-        await this.prismaService.updateShopifyCurrentStock({
-          sku: shopifyOrder.sku,
-          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyOrder.quantity,
-        })
-
-        await this.prismaService.updateBoaGestaoCurrentStock({
-          sku: shopifyOrder.sku,
+          sku: shopifyProduct.sku,
           boaGestaoCurrentStock: productInDb.boaGestaoCurrentStock - boxesNeeded,
         })
 
@@ -131,19 +103,54 @@ export class OrdersService {
           unity: boaGestaoProduct.Unidade,
           quantity: boxesNeeded,
           unityPrice: boaGestaoProduct.PrecoVista,
-          totalItem: productInDb.fractionedQuantity * boaGestaoProduct.PrecoVista,
-          total: productInDb.fractionedQuantity * boaGestaoProduct.PrecoVista,
+          totalItem: boxesNeeded * boaGestaoProduct.PrecoVista,
+          total: boxesNeeded * boaGestaoProduct.PrecoVista,
         }
       }
 
-      totalProducts += shopifyOrder.quantity
-      total += totalItem
+      if (isFractioned && !thereIsAnOpenBoxInStock) {
+        let quantityNeeded = shopifyProduct.quantity
+
+        let boxesNeeded = 0
+        while (quantityNeeded > 0) {
+          quantityNeeded = quantityNeeded - boaGestaoProduct.QuantidadePacote
+          boxesNeeded++
+        }
+
+        quantityNeeded = Math.abs(quantityNeeded)
+
+        await this.prismaService.updateProductFractionedQuantity({
+          sku: shopifyProduct.sku,
+          fractionedQuantity:
+            boaGestaoProduct.QuantidadePacote * boxesNeeded - shopifyProduct.quantity,
+        })
+
+        await this.prismaService.updateShopifyCurrentStock({
+          sku: shopifyProduct.sku,
+          shopifyCurrentStock: productInDb.shopifyCurrentStock - shopifyProduct.quantity,
+        })
+
+        await this.prismaService.updateBoaGestaoCurrentStock({
+          sku: shopifyProduct.sku,
+          boaGestaoCurrentStock: productInDb.boaGestaoCurrentStock - boxesNeeded,
+        })
+
+        return {
+          productId: boaGestaoProduct.Id,
+          sku: boaGestaoProduct.SKU || '',
+          unity: boaGestaoProduct.Unidade,
+          quantity: boxesNeeded,
+          unityPrice: boaGestaoProduct.PrecoVista,
+          totalItem: boxesNeeded * boaGestaoProduct.PrecoVista,
+          total: boxesNeeded * boaGestaoProduct.PrecoVista,
+        }
+      }
 
       return {
         productId: boaGestaoProduct.Id,
         sku: boaGestaoProduct.SKU || '',
         unity: boaGestaoProduct.Unidade,
-        quantity: shopifyOrder.quantity,
+        quantity: shopifyProduct.quantity,
         unityPrice: boaGestaoProduct.PrecoVista,
         totalItem: totalItem,
         total: totalItem,
@@ -152,14 +159,6 @@ export class OrdersService {
 
     const finishedItems = (await Promise.all(items)).filter((item) => item !== null)
 
-    const orderInput = {
-      dateTime,
-      clientId,
-      totalProducts,
-      total,
-      items: finishedItems,
-    }
-
-    return orderInput
+    return finishedItems
   }
 }
