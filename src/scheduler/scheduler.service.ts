@@ -5,6 +5,7 @@ import { BOA_GESTAO_INVENTORY_URL, BOA_GESTAO_PRODUCTS_URL } from '../constants/
 import { mergeProductsAndInventory } from '../utils/boa-gestao'
 import { ProductsService } from 'src/products/services/products.service'
 import { ShopifyService } from 'src/shopify/shopify.service'
+import { PrismaService } from 'src/prisma/prisma.service'
 
 @Injectable()
 export class SchedulerService {
@@ -12,11 +13,12 @@ export class SchedulerService {
     private readonly httpService: HttpService,
     private readonly productsService: ProductsService,
     private readonly shopifyService: ShopifyService,
+    private readonly prismaService: PrismaService,
   ) {}
 
-  @Interval(10000000)
+  @Interval(60000)
   async handleInterval() {
-    console.info('Fetching products...')
+    console.info('Updating stock levels...')
     const headers = {
       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
     }
@@ -46,10 +48,15 @@ export class SchedulerService {
 
     const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
 
+    const skus = shopifyProductVariants.map((variant) => variant.sku)
+    const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
+    const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
+
     const mergedProducts = mergeProductsAndInventory({
       boaGestaoProducts: filteredProducts,
       boaGestaoInventoryRows: boaGestaoInventory.data.rows,
       shopifyProductVariants: shopifyProductVariants,
+      productsInDb,
     })
 
     await this.productsService.upsertProduct(mergedProducts)

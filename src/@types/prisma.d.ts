@@ -1,5 +1,5 @@
 import { Product } from '@prisma/client'
-type ProductWithoutId = Omit<Product, 'id', 'fractionedQuantity'>
+type ProductWithoutId = Omit<Product, 'id'>
 
 interface MergedProduct {
   sku: string | null

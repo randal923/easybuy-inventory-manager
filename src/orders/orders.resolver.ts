@@ -34,58 +34,58 @@ export class OrdersResolver {
     return this.shopifyService.subscribeToOrderPaidWebhook('http://localhost:4000/orders/paid')
   }
 
-  @Query(() => FeedDatabaseResponseDto)
-  async feedDatabase() {
-    try {
-      console.info('Fetching products...')
-      const headers = {
-        Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
-      }
+  // @Query(() => FeedDatabaseResponseDto)
+  // async feedDatabase() {
+  //   try {
+  //     console.info('Fetching products...')
+  //     const headers = {
+  //       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
+  //     }
 
-      const boaGestaoProducts = await this.httpService.get<BoaGestaoProductsResponse>(
-        BOA_GESTAO_PRODUCTS_URL,
-        {
-          headers,
-        },
-      )
+  //     const boaGestaoProducts = await this.httpService.get<BoaGestaoProductsResponse>(
+  //       BOA_GESTAO_PRODUCTS_URL,
+  //       {
+  //         headers,
+  //       },
+  //     )
 
-      // Filter products by SKU for testing purposes
-      const filteredProducts = boaGestaoProducts.data.rows.filter(
-        (product) =>
-          product.SKU === 'ECT24 glow' ||
-          product.SKU === 'ECL24 ELITE glow' ||
-          product.SKU === '25501' ||
-          product.SKU === '25500',
-      )
+  //     // Filter products by SKU for testing purposes
+  //     const filteredProducts = boaGestaoProducts.data.rows.filter(
+  //       (product) =>
+  //         product.SKU === 'ECT24 glow' ||
+  //         product.SKU === 'ECL24 ELITE glow' ||
+  //         product.SKU === '25501' ||
+  //         product.SKU === '25500',
+  //     )
 
-      const boaGestaoInventory = await this.httpService.get<BoaGestaoInventoryResponse>(
-        BOA_GESTAO_INVENTORY_URL,
-        {
-          headers,
-        },
-      )
+  //     const boaGestaoInventory = await this.httpService.get<BoaGestaoInventoryResponse>(
+  //       BOA_GESTAO_INVENTORY_URL,
+  //       {
+  //         headers,
+  //       },
+  //     )
 
-      const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
+  //     const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
 
-      const mergedProducts = mergeProductsAndInventory({
-        boaGestaoProducts: filteredProducts,
-        boaGestaoInventoryRows: boaGestaoInventory.data.rows,
-        shopifyProductVariants: shopifyProductVariants,
-      })
+  //     const mergedProducts = mergeProductsAndInventory({
+  //       boaGestaoProducts: filteredProducts,
+  //       boaGestaoInventoryRows: boaGestaoInventory.data.rows,
+  //       shopifyProductVariants: shopifyProductVariants,
+  //     })
 
-      await this.productsService.upsertProduct(mergedProducts)
-      await this.shopifyService.updateStockLevels(mergedProducts)
+  //     await this.productsService.upsertProduct(mergedProducts)
+  //     await this.shopifyService.updateStockLevels(mergedProducts)
 
-      return {
-        status: 200,
-        message: 'Database fed successfully',
-      }
-    } catch (error) {
-      console.error('Error while feeding database', error)
-      return {
-        status: 500,
-        message: 'Error while feeding database',
-      }
-    }
-  }
+  //     return {
+  //       status: 200,
+  //       message: 'Database fed successfully',
+  //     }
+  //   } catch (error) {
+  //     console.error('Error while feeding database', error)
+  //     return {
+  //       status: 500,
+  //       message: 'Error while feeding database',
+  //     }
+  //   }
+  // }
 }

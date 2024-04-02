@@ -22,13 +22,19 @@ export class ShopifyService {
 
   async updateStockLevels(mergedProducts: MergedProduct[]) {
     for (const mergedProduct of mergedProducts) {
-      const { isFractioned, inventoryItemId, boaGestaoCurrentStock, shopifyCurrentStock } =
-        mergedProduct
+      const {
+        isFractioned,
+        inventoryItemId,
+        boaGestaoCurrentStock,
+        shopifyCurrentStock,
+        packageQuantity,
+        fractionedQuantity,
+      } = mergedProduct
 
       const delta = () => {
         if (isFractioned) {
           return Math.round(
-            boaGestaoCurrentStock * mergedProduct.packageQuantity - shopifyCurrentStock,
+            boaGestaoCurrentStock * packageQuantity + fractionedQuantity - shopifyCurrentStock,
           )
         }
 

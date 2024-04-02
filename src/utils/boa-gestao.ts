@@ -1,15 +1,17 @@
+import { Product } from '@prisma/client'
 import { ProductWithoutId } from 'src/@types/prisma'
 
 interface MergeProductsAndInventory {
   boaGestaoProducts: BoaGestaoProduct[]
   boaGestaoInventoryRows: BoaGestaoInventoryItem[]
   shopifyProductVariants: VariantNode[]
+  productsInDb: Product[]
 }
 
 export const mergeProductsAndInventory = (
   params: MergeProductsAndInventory,
 ): ProductWithoutId[] => {
-  const { boaGestaoProducts, boaGestaoInventoryRows, shopifyProductVariants } = params
+  const { boaGestaoProducts, boaGestaoInventoryRows, shopifyProductVariants, productsInDb } = params
 
   const mergedProducts: ProductWithoutId[] = []
 
@@ -41,6 +43,7 @@ export const mergeProductsAndInventory = (
         return false
       }
 
+      const productInDb = productsInDb.find((productInDb) => productInDb.sku === variant.sku)
       const isFractioned = getMetafield('isfractioned')
       const isZap = getMetafield('iszap')
       const isPanebras = getMetafield('ispanebras')
@@ -51,6 +54,7 @@ export const mergeProductsAndInventory = (
         boaGestaoCurrentStock: boaGestaoInventoryItem.EstoqueAtual,
         shopifyCurrentStock: variant.inventoryQuantity,
         inventoryItemId: variant.inventoryItem.id,
+        fractionedQuantity: productInDb?.fractionedQuantity ?? 0,
         isFractioned,
         isZap,
         isPanebras,
