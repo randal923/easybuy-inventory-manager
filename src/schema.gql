@@ -39,6 +39,24 @@ type FeedDatabaseResponseDto {
   message: String!
 }
 
+type UserError {
+  field: String
+  message: String!
+}
+
+type WebhookSubscription {
+  id: String
+}
+
+type WebhookSubscriptionCreateResponse {
+  userErrors: [UserError]
+  webhookSubscription: WebhookSubscription
+}
+
+type SubscribeToOrderPaidWebhookResponseDto {
+  webhookSubscriptionCreate: WebhookSubscriptionCreateResponse!
+}
+
 type Query {
   products: [Product!]!
   feedDatabase: FeedDatabaseResponseDto!
@@ -46,6 +64,7 @@ type Query {
 
 type Mutation {
   placeOrder(shopifyOrderInput: ShopifyOrderInput!): PlaceOrderResponseDto!
+  subscribeToOrderPaidWebhook: SubscribeToOrderPaidWebhookResponseDto!
 }
 
 input ShopifyOrderInput {

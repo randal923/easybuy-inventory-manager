@@ -10,6 +10,7 @@ import { ShopifyService } from 'src/shopify/shopify.service'
 import { mergeProductsAndInventory } from 'src/utils/boa-gestao'
 import { ProductsService } from 'src/products/services/products.service'
 import { FeedDatabaseResponseDto } from './dtos/feed-database-response.dto'
+import { SubscribeToOrderPaidWebhookResponseDto } from './dtos/subscribe-to-order.dto'
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -26,6 +27,11 @@ export class OrdersResolver {
     shopifyOrderInput: ShopifyOrderInput,
   ) {
     return this.ordersService.placeOrder(shopifyOrderInput)
+  }
+
+  @Mutation(() => SubscribeToOrderPaidWebhookResponseDto)
+  async subscribeToOrderPaidWebhook() {
+    return this.shopifyService.subscribeToOrderPaidWebhook('http://localhost:4000/orders/paid')
   }
 
   @Query(() => FeedDatabaseResponseDto)

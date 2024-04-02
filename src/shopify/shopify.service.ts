@@ -2,10 +2,23 @@ import { ApolloClient } from '@apollo/client/core'
 import { Inject, Injectable } from '@nestjs/common'
 import { MergedProduct } from 'src/@types/prisma'
 import { fetchProductsQuery, productQuantityMutation } from 'src/shopify/queries/products'
+import { subscribeToOrderPaidMutation } from './queries/orders'
 
 @Injectable()
 export class ShopifyService {
   constructor(@Inject('APOLLO_CLIENT') private apolloClient: ApolloClient<any>) {}
+
+  async subscribeToOrderPaidWebhook(callbackUrl: string): Promise<any> {
+    const response = await this.apolloClient.mutate({
+      mutation: subscribeToOrderPaidMutation,
+      variables: {
+        callbackUrl: callbackUrl,
+      },
+    })
+
+    console.log('Subscribed to order paid webhook:', response.data)
+    return response.data
+  }
 
   async updateStockLevels(mergedProducts: MergedProduct[]) {
     for (const mergedProduct of mergedProducts) {
