@@ -11,7 +11,12 @@ interface MergeProductsAndInventory {
 export const mergeProductsAndInventory = (
   params: MergeProductsAndInventory,
 ): ProductWithoutId[] => {
-  const { boaGestaoProducts, boaGestaoInventoryRows, shopifyProductVariants, productsInDb } = params
+  const {
+    boaGestaoProducts,
+    boaGestaoInventoryRows,
+    shopifyProductVariants,
+    productsInDb,
+  } = params
 
   const mergedProducts: ProductWithoutId[] = []
 
@@ -19,7 +24,8 @@ export const mergeProductsAndInventory = (
     const shopifyVariants = shopifyProductVariants.filter((variant) => {
       const cleanedSku = variant.sku ? variant.sku.replace('EB', '') : null
       return (
-        variant.sku === boaGestaoProduct.SKU || (cleanedSku && cleanedSku === boaGestaoProduct.SKU)
+        variant.sku === boaGestaoProduct.SKU ||
+        (cleanedSku && cleanedSku === boaGestaoProduct.SKU)
       )
     })
 
@@ -43,7 +49,9 @@ export const mergeProductsAndInventory = (
         return false
       }
 
-      const productInDb = productsInDb.find((productInDb) => productInDb.sku === variant.sku)
+      const productInDb = productsInDb.find(
+        (productInDb) => productInDb.sku === variant.sku,
+      )
       const isFractioned = getMetafield('isfractioned')
       const isZap = getMetafield('iszap')
       const isPanebras = getMetafield('ispanebras')

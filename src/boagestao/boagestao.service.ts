@@ -20,11 +20,10 @@ export class BoagestaoService {
 
     const portugueseTranslation = translateOrderToPortuguese(orderInput)
 
-    const placedOrder = await this.httpService.post<PortugueseOrder, OrderResponse>(
-      orderUrl,
-      portugueseTranslation,
-      { headers },
-    )
+    const placedOrder = await this.httpService.post<
+      PortugueseOrder,
+      OrderResponse
+    >(orderUrl, portugueseTranslation, { headers })
 
     return placedOrder.data
   }
@@ -36,13 +35,20 @@ export class BoagestaoService {
       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
     }
 
-    const products = await this.httpService.get<BoaGestaoProductsResponse>(productsUrl, {
-      headers,
-    })
+    const products = await this.httpService.get<BoaGestaoProductsResponse>(
+      productsUrl,
+      {
+        headers,
+      },
+    )
 
-    const normalizedSkus = skus.map((sku) => (sku.startsWith('EB') ? sku.substring(2) : sku))
+    const normalizedSkus = skus.map((sku) =>
+      sku.startsWith('EB') ? sku.substring(2) : sku,
+    )
     const skusSet = new Set(normalizedSkus)
-    const filteredProducts = products.data.rows.filter((product) => skusSet.has(product.SKU))
+    const filteredProducts = products.data.rows.filter((product) =>
+      skusSet.has(product.SKU),
+    )
 
     return filteredProducts
   }

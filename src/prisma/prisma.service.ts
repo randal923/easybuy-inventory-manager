@@ -8,7 +8,10 @@ import {
 } from '../@types/prisma'
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   prisma: PrismaClient
 
   constructor() {
@@ -51,7 +54,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     })
   }
 
-  async updateProductFractionedQuantity(params: UpdateProductFractionedQuantity) {
+  async updateProductFractionedQuantity(
+    params: UpdateProductFractionedQuantity,
+  ) {
     const { sku, fractionedQuantity } = params
     return this.product.update({
       where: { sku },
@@ -59,14 +64,20 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     })
   }
 
-  async updateShopifyCurrentStock({ sku, shopifyCurrentStock }: UpdateShopifyCurrentStock) {
+  async updateShopifyCurrentStock({
+    sku,
+    shopifyCurrentStock,
+  }: UpdateShopifyCurrentStock) {
     return this.product.update({
       where: { sku },
       data: { shopifyCurrentStock },
     })
   }
 
-  async updateBoaGestaoCurrentStock({ sku, boaGestaoCurrentStock }: UpdateBoaGestaoCurrentStock) {
+  async updateBoaGestaoCurrentStock({
+    sku,
+    boaGestaoCurrentStock,
+  }: UpdateBoaGestaoCurrentStock) {
     return this.product.update({
       where: { sku },
       data: { boaGestaoCurrentStock },

@@ -5,7 +5,10 @@ import { ValidationPipe } from '@nestjs/common'
 import { ShopifyOrderInput } from './dtos/shopify-order-input.dto'
 import { PlaceOrderResponseDto } from './dtos/place-order-response.dto'
 import { HttpService } from 'src/http/http.service'
-import { BOA_GESTAO_INVENTORY_URL, BOA_GESTAO_PRODUCTS_URL } from 'src/constants/boa-gestao-urls'
+import {
+  BOA_GESTAO_INVENTORY_URL,
+  BOA_GESTAO_PRODUCTS_URL,
+} from 'src/constants/boa-gestao-urls'
 import { ShopifyService } from 'src/shopify/shopify.service'
 import { mergeProductsAndInventory } from 'src/utils/boa-gestao'
 import { ProductsService } from 'src/products/services/products.service'
@@ -31,7 +34,9 @@ export class OrdersResolver {
 
   @Mutation(() => SubscribeToOrderPaidWebhookResponseDto)
   async subscribeToOrderPaidWebhook() {
-    return this.shopifyService.subscribeToOrderPaidWebhook('http://localhost:4000/orders/paid')
+    return this.shopifyService.subscribeToOrderPaidWebhook(
+      'http://localhost:4000/orders/paid',
+    )
   }
 
   // @Query(() => FeedDatabaseResponseDto)

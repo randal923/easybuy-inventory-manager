@@ -14,7 +14,10 @@ describe('BoagestaoService', () => {
     }
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [{ provide: BoagestaoService, useValue: mockBoagestaoService }, HttpService],
+      providers: [
+        { provide: BoagestaoService, useValue: mockBoagestaoService },
+        HttpService,
+      ],
     }).compile()
 
     boaGestaoService = module.get<BoagestaoService>(BoagestaoService)
@@ -24,7 +27,7 @@ describe('BoagestaoService', () => {
     expect(boaGestaoService).toBeDefined()
   })
 
-  it('should get all products by SKU', async () => {
+  it('should get all products by SKU findProductsBySkus', async () => {
     const skus = ['EB123', 'EB456']
     const products = await boaGestaoService.findProductsBySkus(skus)
 

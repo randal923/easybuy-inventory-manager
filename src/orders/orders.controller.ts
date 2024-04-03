@@ -14,7 +14,9 @@ export class OrdersController {
     const skus: string[] = body.line_items.map((item) => item.sku)
     const productsInDb = await this.prismaService.findProductsBySkus(skus)
     const productsWithMetafields = body.line_items.map((product) => {
-      const productInDb = productsInDb.find((productInDb) => product.sku === productInDb.sku)
+      const productInDb = productsInDb.find(
+        (productInDb) => product.sku === productInDb.sku,
+      )
       return {
         ...product,
         isFractioned: productInDb.isFractioned,

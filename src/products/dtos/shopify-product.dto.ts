@@ -1,4 +1,11 @@
-import { IsBoolean, IsInt, IsString, ValidateNested, IsArray, IsObject } from 'class-validator'
+import {
+  IsBoolean,
+  IsInt,
+  IsString,
+  ValidateNested,
+  IsArray,
+  IsObject,
+} from 'class-validator'
 import { Type } from 'class-transformer'
 
 export class ShopifyProduct {
