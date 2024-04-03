@@ -5,7 +5,7 @@ import {
   UpdateBoaGestaoCurrentStock,
   UpdateProductFractionedQuantity,
   UpdateShopifyCurrentStock,
-} from 'src/@types/prisma'
+} from '../@types/prisma'
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {

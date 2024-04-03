@@ -16,7 +16,7 @@ export class SchedulerService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  @Interval(60000)
+  @Interval(30000)
   async handleInterval() {
     console.info('Updating stock levels...')
     const headers = {

@@ -16,7 +16,6 @@ export class ShopifyService {
       },
     })
 
-    console.log('Subscribed to order paid webhook:', response.data)
     return response.data
   }
 

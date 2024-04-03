@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { HttpService } from 'src/http/http.service'
-import { OrderInput } from 'src/orders/dtos/boa-gestao-order-input.dto'
-import { translateOrderToPortuguese } from 'src/utils/orders'
+import { HttpService } from '../http/http.service'
+import { OrderInput } from '../orders/dtos/boa-gestao-order-input.dto'
+import { translateOrderToPortuguese } from '../utils/orders'
 
 export interface OrderResponse {
   id: string

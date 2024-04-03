@@ -1,9 +1,50 @@
 import { Injectable } from '@nestjs/common'
-import { BoagestaoService } from 'src/boagestao/boagestao.service'
-import { ShopifyOrderInput } from './dtos/shopify-order-input.dto'
-import { ItemsInput } from './dtos/boa-gestao-order-input.dto'
-import { PrismaService } from 'src/prisma/prisma.service'
+import { PrismaService } from '../prisma/prisma.service'
+import { ShopifyOrderInput } from '../orders/dtos/shopify-order-input.dto'
+import { BoagestaoService } from '../boagestao/boagestao.service'
+@Injectable()
+export class OrdersService {
+  constructor(
+    private boaGestaoService: BoagestaoService,
+    private prismaService: PrismaService,
+  ) {}
 
+  async placeOrder(shopifyOrderInput: ShopifyOrderInput) {
+    const skus = this.getProductsSkus(shopifyOrderInput)
+    const boaGestaoProducts = await this.boaGestaoService.findProductsBySkus(skus)
+
+    await this.getOrderInput(boaGestaoProducts, shopifyOrderInput)
+
+    return boaGestaoProducts
+  }
+
+  async getOrderInput(boaGestaoProducts: BoaGestaoProduct[], shopifyOrderInput: ShopifyOrderInput) {
+    const dateTime = new Date().toISOString()
+    const clientId = 26
+    const items = await this.getOrderItems(boaGestaoProducts, shopifyOrderInput)
+    const total = items.reduce((acc, item) => acc + item.total, 0)
+
+    const orderInput = {
+      dateTime,
+      clientId,
+      totalProducts: total,
+      total,
+      items,
+    }
+
+    return orderInput
+  }
+
+  getProductsSkus(shopifyOrderInput: ShopifyOrderInput) {
+    return shopifyOrderInput.products.map((product) => product.sku)
+  }
+
+  async getOrderItems(boaGestaoProducts: BoaGestaoProduct[], shopifyOrderInput: ShopifyOrderInput) {
+    return []
+  }
+}
+
+/*
 @Injectable()
 export class OrdersService {
   constructor(
@@ -162,3 +203,4 @@ export class OrdersService {
     return finishedItems
   }
 }
+*/
