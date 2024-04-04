@@ -34,6 +34,11 @@ type PlaceOrderResponseDto {
   message: String
 }
 
+type FeedDatabaseResponseDto {
+  status: Float!
+  message: String!
+}
+
 type UserError {
   field: String
   message: String!
@@ -54,6 +59,7 @@ type SubscribeToOrderPaidWebhookResponseDto {
 
 type Query {
   products: [Product!]!
+  feedDatabase: FeedDatabaseResponseDto!
 }
 
 type Mutation {

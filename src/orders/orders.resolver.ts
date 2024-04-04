@@ -14,14 +14,16 @@ import { mergeProductsAndInventory } from 'src/utils/boa-gestao'
 import { ProductsService } from 'src/products/services/products.service'
 import { FeedDatabaseResponseDto } from './dtos/feed-database-response.dto'
 import { SubscribeToOrderPaidWebhookResponseDto } from './dtos/subscribe-to-order.dto'
+import { PrismaService } from '@src/prisma/prisma.service'
 
 @Resolver(() => Order)
 export class OrdersResolver {
   constructor(
-    private ordersService: OrdersService,
-    private httpService: HttpService,
-    private shopifyService: ShopifyService,
-    private productsService: ProductsService,
+    private readonly ordersService: OrdersService,
+    private readonly httpService: HttpService,
+    private readonly shopifyService: ShopifyService,
+    private readonly productsService: ProductsService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   @Mutation(() => PlaceOrderResponseDto)
@@ -39,58 +41,63 @@ export class OrdersResolver {
     )
   }
 
-  // @Query(() => FeedDatabaseResponseDto)
-  // async feedDatabase() {
-  //   try {
-  //     console.info('Fetching products...')
-  //     const headers = {
-  //       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
-  //     }
+  @Query(() => FeedDatabaseResponseDto)
+  async feedDatabase() {
+    try {
+      console.info('Updating stock levels...')
+      const headers = {
+        Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
+      }
 
-  //     const boaGestaoProducts = await this.httpService.get<BoaGestaoProductsResponse>(
-  //       BOA_GESTAO_PRODUCTS_URL,
-  //       {
-  //         headers,
-  //       },
-  //     )
+      const boaGestaoProducts =
+        await this.httpService.get<BoaGestaoProductsResponse>(
+          BOA_GESTAO_PRODUCTS_URL,
+          {
+            headers,
+          },
+        )
 
-  //     // Filter products by SKU for testing purposes
-  //     const filteredProducts = boaGestaoProducts.data.rows.filter(
-  //       (product) =>
-  //         product.SKU === 'ECT24 glow' ||
-  //         product.SKU === 'ECL24 ELITE glow' ||
-  //         product.SKU === '25501' ||
-  //         product.SKU === '25500',
-  //     )
+      // Filter products by SKU for testing purposes
+      const filteredProducts = boaGestaoProducts.data.rows.filter(
+        (product) => product.SKU === '25501' || product.SKU === '25500',
+      )
 
-  //     const boaGestaoInventory = await this.httpService.get<BoaGestaoInventoryResponse>(
-  //       BOA_GESTAO_INVENTORY_URL,
-  //       {
-  //         headers,
-  //       },
-  //     )
+      const boaGestaoInventory =
+        await this.httpService.get<BoaGestaoInventoryResponse>(
+          BOA_GESTAO_INVENTORY_URL,
+          {
+            headers,
+          },
+        )
 
-  //     const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
+      const shopifyProductVariants =
+        await this.shopifyService.fetchProductsVariants()
 
-  //     const mergedProducts = mergeProductsAndInventory({
-  //       boaGestaoProducts: filteredProducts,
-  //       boaGestaoInventoryRows: boaGestaoInventory.data.rows,
-  //       shopifyProductVariants: shopifyProductVariants,
-  //     })
+      const skus = shopifyProductVariants.map((variant) => variant.sku)
+      const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
+      const productsInDb =
+        await this.prismaService.findProductsBySkus(validSkus)
 
-  //     await this.productsService.upsertProduct(mergedProducts)
-  //     await this.shopifyService.updateStockLevels(mergedProducts)
+      const mergedProducts = mergeProductsAndInventory({
+        boaGestaoProducts: filteredProducts,
+        boaGestaoInventoryRows: boaGestaoInventory.data.rows,
+        shopifyProductVariants: shopifyProductVariants,
+        productsInDb,
+      })
 
-  //     return {
-  //       status: 200,
-  //       message: 'Database fed successfully',
-  //     }
-  //   } catch (error) {
-  //     console.error('Error while feeding database', error)
-  //     return {
-  //       status: 500,
-  //       message: 'Error while feeding database',
-  //     }
-  //   }
-  // }
+      await this.productsService.upsertProduct(mergedProducts)
+      await this.shopifyService.updateStockLevels(mergedProducts)
+
+      return {
+        status: 200,
+        message: 'Database fed successfully',
+      }
+    } catch (error) {
+      console.error('Error while feeding database', error)
+      return {
+        status: 500,
+        message: 'Error while feeding database',
+      }
+    }
+  }
 }

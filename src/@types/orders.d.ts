@@ -15,6 +15,16 @@ interface PortugueseItem {
   Total: number
 }
 
+interface OrderItem {
+  productId: number
+  sku: string
+  unity: string
+  quantity: number
+  unityPrice: number
+  totalItem: number
+  total: number
+}
+
 // ORDER PAID
 
 interface OrderPaid {
