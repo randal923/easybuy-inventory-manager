@@ -45,7 +45,9 @@ export class OrdersService {
     const items = await this.getOrderItems(boaGestaoProducts, shopifyOrderInput)
     const mergedItems = this.mergeSimilarItems(items)
 
-    const total = mergedItems.reduce((acc, item) => acc + item?.total, 0)
+    const total = mergedItems
+      .reduce((acc, item) => acc + item?.total, 0)
+      .toFixed(2)
 
     const orderInput = {
       dateTime,
@@ -72,8 +74,8 @@ export class OrdersService {
       } else {
         const newProduct = {
           ...product,
-          total: quantity * unityPrice,
-          totalItem: quantity * unityPrice,
+          total: (quantity * unityPrice).toFixed(2),
+          totalItem: (quantity * unityPrice).toFixed(2),
         }
         mergedProducts.set(productId, newProduct)
       }
@@ -168,10 +170,7 @@ export class OrdersService {
         })
 
         if (isThereNonFractionedProductForThisSku) {
-          const nonFractionedProductInDb =
-            await this.prismaService.findProductBySku(
-              shopifyProduct.sku.replace(/EB/g, ''),
-            )
+          const nonFractionedProductInDb = isThereNonFractionedProductForThisSku
 
           await this.prismaService.updateShopifyCurrentStock({
             sku: nonFractionedProductInDb.sku,
@@ -192,14 +191,16 @@ export class OrdersService {
           unity: boaGestaoProduct.Unidade,
           quantity: boxesNeeded,
           unityPrice: boaGestaoProduct.PrecoVista,
-          totalItem: boxesNeeded * boaGestaoProduct.PrecoVista,
-          total: boxesNeeded * boaGestaoProduct.PrecoVista,
+          totalItem: (boxesNeeded * boaGestaoProduct.PrecoVista).toFixed(2),
+          total: (boxesNeeded * boaGestaoProduct.PrecoVista).toFixed(2),
         })
 
         continue
       }
 
-      const totalItem = shopifyProduct.quantity * boaGestaoProduct.PrecoVista
+      const totalItem = (
+        shopifyProduct.quantity * boaGestaoProduct.PrecoVista
+      ).toFixed(2)
 
       await this.prismaService.updateBoaGestaoCurrentStock({
         sku: shopifyProduct.sku,
@@ -213,10 +214,8 @@ export class OrdersService {
           productInDb.shopifyCurrentStock - shopifyProduct.quantity,
       })
 
-      if (!isThereFractionedProductForThisSku) {
-        const fractionedProductInDb = await this.prismaService.findProductBySku(
-          shopifyProduct.sku.replace(/EB/g, ''),
-        )
+      if (isThereFractionedProductForThisSku) {
+        const fractionedProductInDb = isThereFractionedProductForThisSku
 
         await this.prismaService.updateBoaGestaoCurrentStock({
           sku: fractionedProductInDb.sku,
@@ -224,11 +223,11 @@ export class OrdersService {
             fractionedProductInDb.boaGestaoCurrentStock -
             shopifyProduct.quantity,
         })
+
         await this.prismaService.updateShopifyCurrentStock({
           sku: fractionedProductInDb.sku,
           shopifyCurrentStock:
-            fractionedProductInDb.shopifyCurrentStock *
-              boaGestaoProduct.QuantidadePacote -
+            fractionedProductInDb.shopifyCurrentStock -
             shopifyProduct.quantity * boaGestaoProduct.QuantidadePacote,
         })
       }
