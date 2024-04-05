@@ -11,7 +11,6 @@ export class OrdersService {
   ) {}
 
   async placeOrder(shopifyOrderInput: ShopifyOrderInput) {
-    console.log('shopifyOrderInput', shopifyOrderInput)
     const skus = this.getProductsSkus(shopifyOrderInput)
     const boaGestaoProducts =
       await this.boaGestaoService.findProductsBySkus(skus)
@@ -20,8 +19,6 @@ export class OrdersService {
       boaGestaoProducts,
       shopifyOrderInput,
     )
-
-    console.log('orderInput', orderInput)
 
     if (orderInput.items.length === 0) {
       return {
@@ -32,7 +29,6 @@ export class OrdersService {
     }
 
     const response = await this.boaGestaoService.placeOrder(orderInput)
-    console.log('response', response)
     return response
   }
 
@@ -243,7 +239,6 @@ export class OrdersService {
       })
     }
 
-    console.log('items', items)
     return items
   }
 }
