@@ -11,13 +11,29 @@ export class OrdersService {
   ) {}
 
   async placeOrder(shopifyOrderInput: ShopifyOrderInput) {
+    console.log('shopifyOrderInput', shopifyOrderInput)
     const skus = this.getProductsSkus(shopifyOrderInput)
     const boaGestaoProducts =
       await this.boaGestaoService.findProductsBySkus(skus)
 
-    await this.getOrderInput(boaGestaoProducts, shopifyOrderInput)
+    const orderInput = await this.getOrderInput(
+      boaGestaoProducts,
+      shopifyOrderInput,
+    )
 
-    return boaGestaoProducts
+    console.log('orderInput', orderInput)
+
+    if (orderInput.items.length === 0) {
+      return {
+        status: 200,
+        message:
+          'No order placed on Boa Gestão because there was enough fractioned items for this order',
+      }
+    }
+
+    const response = await this.boaGestaoService.placeOrder(orderInput)
+    console.log('response', response)
+    return response
   }
 
   async getOrderInput(
@@ -99,6 +115,12 @@ export class OrdersService {
       const isThereFractionedProductForThisSku =
         await this.prismaService.findProductBySku(`EB${shopifyProduct.sku}`)
 
+      const isThereNonFractionedProductForThisSku =
+        shopifyProduct.sku.startsWith('EB')
+          ? await this.prismaService.findProductBySku(
+              shopifyProduct.sku.replace(/EB/g, ''),
+            )
+          : false
       const isFractionedQuantityEnough =
         productInDb.fractionedQuantity >= shopifyProduct.quantity
 
@@ -142,11 +164,27 @@ export class OrdersService {
         await this.prismaService.updateShopifyCurrentStock({
           sku: shopifyProduct.sku,
           shopifyCurrentStock:
-            productInDb.boaGestaoCurrentStock *
-              boaGestaoProduct.QuantidadePacote -
-            shopifyProduct.quantity -
-            productInDb.fractionedQuantity,
+            productInDb.shopifyCurrentStock - shopifyProduct.quantity,
         })
+
+        if (isThereNonFractionedProductForThisSku) {
+          const nonFractionedProductInDb =
+            await this.prismaService.findProductBySku(
+              shopifyProduct.sku.replace(/EB/g, ''),
+            )
+
+          await this.prismaService.updateShopifyCurrentStock({
+            sku: nonFractionedProductInDb.sku,
+            shopifyCurrentStock:
+              nonFractionedProductInDb.shopifyCurrentStock - boxesNeeded,
+          })
+
+          await this.prismaService.updateBoaGestaoCurrentStock({
+            sku: nonFractionedProductInDb.sku,
+            boaGestaoCurrentStock:
+              nonFractionedProductInDb.boaGestaoCurrentStock - boxesNeeded,
+          })
+        }
 
         items.push({
           productId: boaGestaoProduct.Id,
@@ -176,15 +214,20 @@ export class OrdersService {
       })
 
       if (!isThereFractionedProductForThisSku) {
+        const fractionedProductInDb = await this.prismaService.findProductBySku(
+          shopifyProduct.sku.replace(/EB/g, ''),
+        )
+
         await this.prismaService.updateBoaGestaoCurrentStock({
-          sku: `EB${shopifyProduct.sku}`,
+          sku: fractionedProductInDb.sku,
           boaGestaoCurrentStock:
-            productInDb.boaGestaoCurrentStock - shopifyProduct.quantity,
+            fractionedProductInDb.boaGestaoCurrentStock -
+            shopifyProduct.quantity,
         })
         await this.prismaService.updateShopifyCurrentStock({
-          sku: `EB${shopifyProduct.sku}`,
+          sku: fractionedProductInDb.sku,
           shopifyCurrentStock:
-            productInDb.shopifyCurrentStock *
+            fractionedProductInDb.shopifyCurrentStock *
               boaGestaoProduct.QuantidadePacote -
             shopifyProduct.quantity * boaGestaoProduct.QuantidadePacote,
         })
@@ -200,6 +243,8 @@ export class OrdersService {
         total: totalItem,
       })
     }
+
+    console.log('items', items)
     return items
   }
 }

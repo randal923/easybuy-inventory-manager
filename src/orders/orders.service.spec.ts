@@ -278,7 +278,7 @@ describe('OrdersService', () => {
     })
     expect(prismaService.updateShopifyCurrentStock).toHaveBeenCalledWith({
       sku: 'EBSKU123',
-      shopifyCurrentStock: 545,
+      shopifyCurrentStock: 555,
     })
   })
 
