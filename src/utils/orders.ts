@@ -1,7 +1,4 @@
-import {
-  ItemsInput,
-  OrderInput,
-} from 'src/orders/dtos/boa-gestao-order-input.dto'
+import { ItemsInput, OrderInput } from 'src/orders/dtos/boa-gestao-order-input.dto'
 
 export function translateOrderToPortuguese(order: OrderInput): PortugueseOrder {
   return {
@@ -13,9 +10,7 @@ export function translateOrderToPortuguese(order: OrderInput): PortugueseOrder {
   }
 }
 
-export function translateOrderItemToPortuguese(
-  item: ItemsInput,
-): PortugueseItem {
+export function translateOrderItemToPortuguese(item: ItemsInput): PortugueseItem {
   return {
     ProdutoId: item.productId,
     Unidade: item.unity,

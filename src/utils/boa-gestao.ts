@@ -56,11 +56,28 @@ export const mergeProductsAndInventory = (
       const isZap = getMetafield('iszap')
       const isPanebras = getMetafield('ispanebras')
 
+      const calculateShopifyCurrentStock = () => {
+        const currentStock =
+          boaGestaoInventoryItem.EstoqueAtual -
+          Math.abs(boaGestaoInventoryItem.PrevisaoSaida)
+
+        if (isFractioned) {
+          return (
+            currentStock * boaGestaoProduct.QuantidadePacote +
+            productInDb.fractionedQuantity
+          )
+        }
+
+        return currentStock
+      }
+
       const productVariant: ProductWithoutId = {
         sku: variant.sku,
         packageQuantity: boaGestaoProduct.QuantidadePacote,
-        boaGestaoCurrentStock: boaGestaoInventoryItem.EstoqueAtual,
-        shopifyCurrentStock: variant.inventoryQuantity,
+        boaGestaoCurrentStock:
+          boaGestaoInventoryItem.EstoqueAtual -
+          Math.abs(boaGestaoInventoryItem.PrevisaoSaida),
+        shopifyCurrentStock: calculateShopifyCurrentStock(),
         inventoryItemId: variant.inventoryItem.id,
         fractionedQuantity: productInDb?.fractionedQuantity ?? 0,
         isFractioned,

@@ -8,10 +8,7 @@ import {
 } from '../@types/prisma'
 
 @Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   prisma: PrismaClient
 
   constructor() {
@@ -54,9 +51,7 @@ export class PrismaService
     })
   }
 
-  async updateProductFractionedQuantity(
-    params: UpdateProductFractionedQuantity,
-  ) {
+  async updateProductFractionedQuantity(params: UpdateProductFractionedQuantity) {
     const { sku, fractionedQuantity } = params
     return this.product.update({
       where: { sku },

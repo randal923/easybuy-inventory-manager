@@ -1,12 +1,6 @@
 import { Field, Int, ObjectType, Float } from '@nestjs/graphql'
 import { Type } from 'class-transformer'
-import {
-  IsArray,
-  IsInt,
-  IsNumber,
-  IsString,
-  ValidateNested,
-} from 'class-validator'
+import { IsArray, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
 
 @ObjectType()
 export class Order {

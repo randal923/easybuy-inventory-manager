@@ -1,17 +1,12 @@
 import { ApolloClient } from '@apollo/client/core'
 import { Inject, Injectable } from '@nestjs/common'
 import { MergedProduct } from 'src/@types/prisma'
-import {
-  fetchProductsQuery,
-  productQuantityMutation,
-} from 'src/shopify/queries/products'
+import { fetchProductsQuery, productQuantityMutation } from 'src/shopify/queries/products'
 import { subscribeToOrderPaidMutation } from './queries/orders'
 
 @Injectable()
 export class ShopifyService {
-  constructor(
-    @Inject('APOLLO_CLIENT') private apolloClient: ApolloClient<any>,
-  ) {}
+  constructor(@Inject('APOLLO_CLIENT') private apolloClient: ApolloClient<any>) {}
 
   async subscribeToOrderPaidWebhook(callbackUrl: string): Promise<any> {
     const response = await this.apolloClient.mutate({
@@ -72,24 +67,20 @@ export class ShopifyService {
         query: fetchProductsQuery,
       })
 
-      const productVariants = data.products.edges.flatMap(
-        (edge: ShopifyProductEdge) => {
-          const product = edge.node
-          const variants = product.variants.edges
+      const productVariants = data.products.edges.flatMap((edge: ShopifyProductEdge) => {
+        const product = edge.node
+        const variants = product.variants.edges
 
-          return variants.map((variant: VariantEdge) => {
-            const variantTitle =
-              variant.node.title === 'Default Title'
-                ? product.title
-                : variant.node.title
+        return variants.map((variant: VariantEdge) => {
+          const variantTitle =
+            variant.node.title === 'Default Title' ? product.title : variant.node.title
 
-            return {
-              ...variant.node,
-              title: variantTitle,
-            }
-          })
-        },
-      )
+          return {
+            ...variant.node,
+            title: variantTitle,
+          }
+        })
+      })
 
       return productVariants
     } catch (error) {

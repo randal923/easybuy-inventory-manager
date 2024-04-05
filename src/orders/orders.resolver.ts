@@ -49,34 +49,30 @@ export class OrdersResolver {
         Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
       }
 
-      const boaGestaoProducts =
-        await this.httpService.get<BoaGestaoProductsResponse>(
-          BOA_GESTAO_PRODUCTS_URL,
-          {
-            headers,
-          },
-        )
+      const boaGestaoProducts = await this.httpService.get<BoaGestaoProductsResponse>(
+        BOA_GESTAO_PRODUCTS_URL,
+        {
+          headers,
+        },
+      )
 
       // Filter products by SKU for testing purposes
       const filteredProducts = boaGestaoProducts.data.rows.filter(
         (product) => product.SKU === '25501' || product.SKU === '25500',
       )
 
-      const boaGestaoInventory =
-        await this.httpService.get<BoaGestaoInventoryResponse>(
-          BOA_GESTAO_INVENTORY_URL,
-          {
-            headers,
-          },
-        )
+      const boaGestaoInventory = await this.httpService.get<BoaGestaoInventoryResponse>(
+        BOA_GESTAO_INVENTORY_URL,
+        {
+          headers,
+        },
+      )
 
-      const shopifyProductVariants =
-        await this.shopifyService.fetchProductsVariants()
+      const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
 
       const skus = shopifyProductVariants.map((variant) => variant.sku)
       const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
-      const productsInDb =
-        await this.prismaService.findProductsBySkus(validSkus)
+      const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
 
       const mergedProducts = mergeProductsAndInventory({
         boaGestaoProducts: filteredProducts,

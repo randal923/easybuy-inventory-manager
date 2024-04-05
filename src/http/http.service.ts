@@ -3,10 +3,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 @Injectable()
 export class HttpService {
-  async get<T>(
-    url: string,
-    config?: AxiosRequestConfig,
-  ): Promise<AxiosResponse<T>> {
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     try {
       const response = await axios.get<T>(url, config)
       return response
