@@ -42,7 +42,7 @@ const nonFractionedProduct: Product = {
 
 const fractionedProduct: Product = {
   id: 2,
-  sku: 'EBSKU123',
+  sku: 'FRSKU123',
   packageQuantity: 20,
   fractionedQuantity: 5,
   shopifyCurrentStock: 605,
@@ -68,7 +68,7 @@ describe('OrdersService', () => {
     const mockPrismaService = {
       findProductBySku: jest.fn().mockImplementation((sku) => {
         if (sku === 'SKU123') return nonFractionedProduct
-        if (sku === 'EBSKU123') return fractionedProduct
+        if (sku === 'FRSKU123') return fractionedProduct
       }),
       updateProductFractionedQuantity: jest.fn(),
       updateShopifyCurrentStock: jest.fn(),
@@ -124,7 +124,7 @@ describe('OrdersService', () => {
     const mockShopifyOrderInput: ShopifyOrderInput = {
       products: [
         { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'EBSKU123', quantity: 15, isFractioned: true },
+        { sku: 'FRSKU123', quantity: 15, isFractioned: true },
       ],
     }
 
@@ -189,7 +189,7 @@ describe('OrdersService', () => {
   it(`should return no items if product is fractioned 
       and there is enough items in open boxes`, async () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
-      products: [{ sku: 'EBSKU123', quantity: 1, isFractioned: true }],
+      products: [{ sku: 'FRSKU123', quantity: 1, isFractioned: true }],
     })
 
     expect(result).toEqual([])
@@ -200,7 +200,7 @@ describe('OrdersService', () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
         { sku: 'SKU123', quantity: 4, isFractioned: false },
-        { sku: 'EBSKU123', quantity: 1, isFractioned: true },
+        { sku: 'FRSKU123', quantity: 1, isFractioned: true },
       ],
     })
 
@@ -221,7 +221,7 @@ describe('OrdersService', () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
         { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'EBSKU123', quantity: 10, isFractioned: true },
+        { sku: 'FRSKU123', quantity: 10, isFractioned: true },
       ],
     })
 
@@ -243,7 +243,7 @@ describe('OrdersService', () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
         { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'EBSKU123', quantity: 50, isFractioned: true },
+        { sku: 'FRSKU123', quantity: 50, isFractioned: true },
       ],
     })
 
@@ -269,15 +269,15 @@ describe('OrdersService', () => {
     ])
 
     expect(prismaService.updateProductFractionedQuantity).toHaveBeenCalledWith({
-      sku: 'EBSKU123',
+      sku: 'FRSKU123',
       fractionedQuantity: 15,
     })
     expect(prismaService.updateBoaGestaoCurrentStock).toHaveBeenCalledWith({
-      sku: 'EBSKU123',
+      sku: 'FRSKU123',
       boaGestaoCurrentStock: 27,
     })
     expect(prismaService.updateShopifyCurrentStock).toHaveBeenCalledWith({
-      sku: 'EBSKU123',
+      sku: 'FRSKU123',
       shopifyCurrentStock: 555,
     })
   })
@@ -286,7 +286,7 @@ describe('OrdersService', () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
         { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'EBSKU123', quantity: 70, isFractioned: true },
+        { sku: 'FRSKU123', quantity: 70, isFractioned: true },
       ],
     })
 

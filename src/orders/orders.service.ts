@@ -37,7 +37,7 @@ export class OrdersService {
     const items = await this.getOrderItems(boaGestaoProducts, shopifyOrderInput)
     const mergedItems = this.mergeSimilarItems(items)
 
-    const total = mergedItems.reduce((acc, item) => acc + item?.total, 0).toFixed(2)
+    const total = mergedItems.reduce((acc, item) => acc + item?.total, 0)
 
     const orderInput = {
       dateTime,
@@ -64,8 +64,8 @@ export class OrdersService {
       } else {
         const newProduct = {
           ...product,
-          total: (quantity * unityPrice).toFixed(2),
-          totalItem: (quantity * unityPrice).toFixed(2),
+          total: quantity * unityPrice,
+          totalItem: quantity * unityPrice,
         }
         mergedProducts.set(productId, newProduct)
       }
@@ -86,7 +86,7 @@ export class OrdersService {
 
     for (const shopifyProduct of shopifyOrderInput.products) {
       const matchSkuWithBoaGestao = (sku: string) =>
-        sku.startsWith('EB') ? sku.substring(2) : sku
+        sku.startsWith('FR') ? sku.substring(2) : sku
 
       const boaGestaoProduct = boaGestaoProducts.find(
         (product) => product.SKU === matchSkuWithBoaGestao(shopifyProduct.sku),
@@ -100,10 +100,10 @@ export class OrdersService {
       const isFractioned = shopifyProduct.isFractioned
       const productInDb = await this.prismaService.findProductBySku(shopifyProduct.sku)
       const isThereFractionedProductForThisSku =
-        await this.prismaService.findProductBySku(`EB${shopifyProduct.sku}`)
+        await this.prismaService.findProductBySku(`FR${shopifyProduct.sku}`)
 
-      const isThereNonFractionedProductForThisSku = shopifyProduct.sku.startsWith('EB')
-        ? await this.prismaService.findProductBySku(shopifyProduct.sku.replace(/EB/g, ''))
+      const isThereNonFractionedProductForThisSku = shopifyProduct.sku.startsWith('FR')
+        ? await this.prismaService.findProductBySku(shopifyProduct.sku.replace(/FR/g, ''))
         : false
       const isFractionedQuantityEnough =
         productInDb.fractionedQuantity >= shopifyProduct.quantity
@@ -169,14 +169,14 @@ export class OrdersService {
           unity: boaGestaoProduct.Unidade,
           quantity: boxesNeeded,
           unityPrice: boaGestaoProduct.PrecoVista,
-          totalItem: (boxesNeeded * boaGestaoProduct.PrecoVista).toFixed(2),
-          total: (boxesNeeded * boaGestaoProduct.PrecoVista).toFixed(2),
+          totalItem: boxesNeeded * boaGestaoProduct.PrecoVista,
+          total: boxesNeeded * boaGestaoProduct.PrecoVista,
         })
 
         continue
       }
 
-      const totalItem = (shopifyProduct.quantity * boaGestaoProduct.PrecoVista).toFixed(2)
+      const totalItem = shopifyProduct.quantity * boaGestaoProduct.PrecoVista
 
       await this.prismaService.updateBoaGestaoCurrentStock({
         sku: shopifyProduct.sku,
