@@ -86,7 +86,7 @@ export class OrdersService {
 
     for (const shopifyProduct of shopifyOrderInput.products) {
       const matchSkuWithBoaGestao = (sku: string) =>
-        sku.startsWith('FR') ? sku.substring(2) : sku
+        sku.startsWith('FR-') ? sku.substring(3) : sku
 
       const boaGestaoProduct = boaGestaoProducts.find(
         (product) => product.SKU === matchSkuWithBoaGestao(shopifyProduct.sku),
@@ -102,8 +102,10 @@ export class OrdersService {
       const isThereFractionedProductForThisSku =
         await this.prismaService.findProductBySku(`FR${shopifyProduct.sku}`)
 
-      const isThereNonFractionedProductForThisSku = shopifyProduct.sku.startsWith('FR')
-        ? await this.prismaService.findProductBySku(shopifyProduct.sku.replace(/FR/g, ''))
+      const isThereNonFractionedProductForThisSku = shopifyProduct.sku.startsWith('FR-')
+        ? await this.prismaService.findProductBySku(
+            shopifyProduct.sku.replace(/FR-/g, ''),
+          )
         : false
       const isFractionedQuantityEnough =
         productInDb.fractionedQuantity >= shopifyProduct.quantity

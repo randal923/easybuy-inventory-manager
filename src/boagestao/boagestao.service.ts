@@ -41,8 +41,9 @@ export class BoagestaoService {
     })
 
     const normalizedSkus = skus.map((sku) =>
-      sku.startsWith('FR') ? sku.substring(2) : sku,
+      sku.startsWith('FR-') ? sku.substring(3) : sku,
     )
+
     const skusSet = new Set(normalizedSkus)
     const filteredProducts = products.data.rows.filter((product) =>
       skusSet.has(product.SKU),

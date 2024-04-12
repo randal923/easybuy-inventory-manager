@@ -19,21 +19,19 @@ export class SchedulerService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  @Interval(10000)
+  @Interval(5000)
   async handleInterval() {
     console.info('Updating stock levels...')
     const headers = {
       Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
     }
 
-    const boaGestaoProducts = await this.httpService.get<BoaGestaoProductsResponse>(
-      BOA_GESTAO_PRODUCTS_URL,
-      {
+    const boaGestaoProducts = await this.makeRequestWithRetry(() =>
+      this.httpService.get<BoaGestaoProductsResponse>(BOA_GESTAO_PRODUCTS_URL, {
         headers,
-      },
+      }),
     )
 
-    // Filter products by SKU for testing purposes
     const filteredProducts = boaGestaoProducts.data.rows.filter(
       (product) =>
         product.SKU === 'ECT24 glow' ||
@@ -42,15 +40,13 @@ export class SchedulerService {
         product.SKU === '25500',
     )
 
-    const boaGestaoInventory = await this.httpService.get<BoaGestaoInventoryResponse>(
-      BOA_GESTAO_INVENTORY_URL,
-      {
+    const boaGestaoInventory = await this.makeRequestWithRetry(() =>
+      this.httpService.get<BoaGestaoInventoryResponse>(BOA_GESTAO_INVENTORY_URL, {
         headers,
-      },
+      }),
     )
 
     const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
-
     const skus = shopifyProductVariants.map((variant) => variant.sku)
     const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
     const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
@@ -65,4 +61,34 @@ export class SchedulerService {
     await this.productsService.upsertProduct(mergedProducts)
     await this.shopifyService.updateStockLevels(mergedProducts)
   }
-}
+
+  private async makeRequestWithRetry<T>(
+    requestFn: () => Promise<T>,
+    maxRetries = 1,
+  ): Promise<T> {
+    let retries = 0;
+    while (retries < maxRetries) {
+      try {
+        return await requestFn();
+      } catch (error) {
+        if (error.response && error.response.status === 429) {
+          // Assuming the API returns the delay in the response body in seconds
+          const retryDelay = error.response.data.time * 1000;
+          if (retryDelay > 0) {
+            retries++;
+            console.warn(`Request failed with status 429. Retrying in ${retryDelay}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          } else {
+            // No valid retry delay found, log an error and break out of the loop.
+            console.error('Request failed with status 429, but no valid retry delay provided.');
+            throw new Error('Request failed with status 429, but no valid retry delay provided.');
+          }
+        } else {
+          // For any other errors, rethrow and stop retrying.
+          throw error;
+        }
+      }
+    }
+    throw new Error('Max retries exceeded');
+  }
+  
