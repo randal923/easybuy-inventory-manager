@@ -33,6 +33,7 @@ const nonFractionedProduct: Product = {
   packageQuantity: 20,
   fractionedQuantity: 0,
   shopifyCurrentStock: 30,
+  shopifyLaggingStock: 30,
   boaGestaoCurrentStock: 30,
   inventoryItemId: 'inventoryItemId',
   isFractioned: false,
@@ -42,10 +43,11 @@ const nonFractionedProduct: Product = {
 
 const fractionedProduct: Product = {
   id: 2,
-  sku: 'FRSKU123',
+  sku: 'FR-SKU123',
   packageQuantity: 20,
   fractionedQuantity: 5,
   shopifyCurrentStock: 605,
+  shopifyLaggingStock: 605,
   boaGestaoCurrentStock: 30,
   inventoryItemId: 'inventoryItemId2',
   isFractioned: true,
@@ -68,7 +70,7 @@ describe('OrdersService', () => {
     const mockPrismaService = {
       findProductBySku: jest.fn().mockImplementation((sku) => {
         if (sku === 'SKU123') return nonFractionedProduct
-        if (sku === 'FRSKU123') return fractionedProduct
+        if (sku === 'FR-SKU123') return fractionedProduct
       }),
       updateProductFractionedQuantity: jest.fn(),
       updateShopifyCurrentStock: jest.fn(),
@@ -93,7 +95,15 @@ describe('OrdersService', () => {
 
   it('should correctly generate order input for 1 product', async () => {
     const mockShopifyOrderInput: ShopifyOrderInput = {
-      products: [{ sku: 'SKU123', quantity: 1, isFractioned: false }],
+      products: [
+        {
+          sku: 'SKU123',
+          quantity: 1,
+          isFractioned: false,
+          isZap: true,
+          isPanebras: false,
+        },
+      ],
     }
 
     const result = await ordersService.getOrderInput(
@@ -123,8 +133,20 @@ describe('OrdersService', () => {
   it('should correctly merged similar products in order input', async () => {
     const mockShopifyOrderInput: ShopifyOrderInput = {
       products: [
-        { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'FRSKU123', quantity: 15, isFractioned: true },
+        {
+          sku: 'SKU123',
+          quantity: 1,
+          isFractioned: false,
+          isZap: true,
+          isPanebras: false,
+        },
+        {
+          sku: 'FR-SKU123',
+          quantity: 15,
+          isFractioned: true,
+          isZap: true,
+          isPanebras: false,
+        },
       ],
     }
 
@@ -155,7 +177,15 @@ describe('OrdersService', () => {
   it(`should return correct items for order with non fractioned products 
       and it should update the database correctly`, async () => {
     const shopifyOrderInput = {
-      products: [{ sku: 'SKU123', quantity: 1, isFractioned: false }],
+      products: [
+        {
+          sku: 'SKU123',
+          quantity: 1,
+          isFractioned: false,
+          isZap: true,
+          isPanebras: false,
+        },
+      ],
     }
 
     const result = await ordersService.getOrderItems(
@@ -189,7 +219,15 @@ describe('OrdersService', () => {
   it(`should return no items if product is fractioned 
       and there is enough items in open boxes`, async () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
-      products: [{ sku: 'FRSKU123', quantity: 1, isFractioned: true }],
+      products: [
+        {
+          sku: 'FR-SKU123',
+          quantity: 1,
+          isFractioned: true,
+          isZap: true,
+          isPanebras: false,
+        },
+      ],
     })
 
     expect(result).toEqual([])
@@ -199,8 +237,20 @@ describe('OrdersService', () => {
       items and there is enough items in open boxes`, async () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
-        { sku: 'SKU123', quantity: 4, isFractioned: false },
-        { sku: 'FRSKU123', quantity: 1, isFractioned: true },
+        {
+          sku: 'SKU123',
+          quantity: 4,
+          isFractioned: false,
+          isZap: true,
+          isPanebras: false,
+        },
+        {
+          sku: 'FR-SKU123',
+          quantity: 1,
+          isFractioned: true,
+          isZap: true,
+          isPanebras: false,
+        },
       ],
     })
 
@@ -220,8 +270,20 @@ describe('OrdersService', () => {
   it(`should returm all items if fractioned items are not enough`, async () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
-        { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'FRSKU123', quantity: 10, isFractioned: true },
+        {
+          sku: 'SKU123',
+          quantity: 1,
+          isFractioned: false,
+          isZap: true,
+          isPanebras: false,
+        },
+        {
+          sku: 'FR-SKU123',
+          quantity: 10,
+          isFractioned: true,
+          isZap: true,
+          isPanebras: false,
+        },
       ],
     })
 
@@ -242,8 +304,20 @@ describe('OrdersService', () => {
       and update database correctly`, async () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
-        { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'FRSKU123', quantity: 50, isFractioned: true },
+        {
+          sku: 'SKU123',
+          quantity: 1,
+          isFractioned: false,
+          isZap: true,
+          isPanebras: false,
+        },
+        {
+          sku: 'FR-SKU123',
+          quantity: 50,
+          isFractioned: true,
+          isZap: true,
+          isPanebras: false,
+        },
       ],
     })
 
@@ -269,15 +343,15 @@ describe('OrdersService', () => {
     ])
 
     expect(prismaService.updateProductFractionedQuantity).toHaveBeenCalledWith({
-      sku: 'FRSKU123',
+      sku: 'FR-SKU123',
       fractionedQuantity: 15,
     })
     expect(prismaService.updateBoaGestaoCurrentStock).toHaveBeenCalledWith({
-      sku: 'FRSKU123',
+      sku: 'FR-SKU123',
       boaGestaoCurrentStock: 27,
     })
     expect(prismaService.updateShopifyCurrentStock).toHaveBeenCalledWith({
-      sku: 'FRSKU123',
+      sku: 'FR-SKU123',
       shopifyCurrentStock: 555,
     })
   })
@@ -285,8 +359,20 @@ describe('OrdersService', () => {
   it(`should open new box if there is not enough fractioned items`, async () => {
     const result = await ordersService.getOrderItems(mockBoaGestaoProducts, {
       products: [
-        { sku: 'SKU123', quantity: 1, isFractioned: false },
-        { sku: 'FRSKU123', quantity: 70, isFractioned: true },
+        {
+          sku: 'SKU123',
+          quantity: 1,
+          isFractioned: false,
+          isZap: true,
+          isPanebras: false,
+        },
+        {
+          sku: 'FR-SKU123',
+          quantity: 70,
+          isFractioned: true,
+          isZap: true,
+          isPanebras: false,
+        },
       ],
     })
 

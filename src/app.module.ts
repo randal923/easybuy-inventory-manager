@@ -16,6 +16,7 @@ import { BoagestaoService } from './boagestao/boagestao.service'
 import { BoagestaoModule } from './boagestao/boagestao.module'
 import { OrdersResolver } from './orders/orders.resolver'
 import { OrdersService } from './orders/orders.service'
+import { PrismaResolver } from './prisma/prisma.resolver'
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { OrdersService } from './orders/orders.service'
     OrdersService,
     SchedulerService,
     HttpService,
+    PrismaResolver,
     PrismaService,
     ShopifyService,
     BoagestaoService,

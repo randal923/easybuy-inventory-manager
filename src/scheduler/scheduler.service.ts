@@ -19,32 +19,49 @@ export class SchedulerService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  @Interval(5000)
+  @Interval(50000)
   async handleInterval() {
     console.info('Updating stock levels...')
-    const headers = {
-      Authorization: `Bearer ${process.env.BOA_GESTAO_API_KEY}`,
+    const panebrasHeaders = {
+      Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
+    }
+    const zapHeaders = {
+      Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
     }
 
-    const boaGestaoProducts = await this.makeRequestWithRetry(() =>
+    const panebrasProducts = await this.makeRequestWithRetry(() =>
       this.httpService.get<BoaGestaoProductsResponse>(BOA_GESTAO_PRODUCTS_URL, {
-        headers,
+        headers: panebrasHeaders,
       }),
     )
 
-    const filteredProducts = boaGestaoProducts.data.rows.filter(
-      (product) =>
-        product.SKU === 'ECT24 glow' ||
-        product.SKU === 'ECL24 ELITE glow' ||
-        product.SKU === '25501' ||
-        product.SKU === '25500',
+    const zapProducts = await this.makeRequestWithRetry(() =>
+      this.httpService.get<BoaGestaoProductsResponse>(BOA_GESTAO_PRODUCTS_URL, {
+        headers: zapHeaders,
+      }),
     )
 
-    const boaGestaoInventory = await this.makeRequestWithRetry(() =>
+    const mergedBoaGestaoProducts = [
+      ...panebrasProducts.data.rows,
+      ...zapProducts.data.rows,
+    ].filter((row) => row.SKU === 'LACTA-0001-0001' || row.SKU === 'LACTA-0001-0002')
+
+    const panebrasInventory = await this.makeRequestWithRetry(() =>
       this.httpService.get<BoaGestaoInventoryResponse>(BOA_GESTAO_INVENTORY_URL, {
-        headers,
+        headers: panebrasHeaders,
       }),
     )
+
+    const zapInventory = await this.makeRequestWithRetry(() =>
+      this.httpService.get<BoaGestaoInventoryResponse>(BOA_GESTAO_INVENTORY_URL, {
+        headers: zapHeaders,
+      }),
+    )
+
+    const mergedBoaGestaoInventory = [
+      ...panebrasInventory.data.rows,
+      ...zapInventory.data.rows,
+    ]
 
     const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
     const skus = shopifyProductVariants.map((variant) => variant.sku)
@@ -52,8 +69,8 @@ export class SchedulerService {
     const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
 
     const mergedProducts = mergeProductsAndInventory({
-      boaGestaoProducts: filteredProducts,
-      boaGestaoInventoryRows: boaGestaoInventory.data.rows,
+      boaGestaoProducts: mergedBoaGestaoProducts,
+      boaGestaoInventoryRows: mergedBoaGestaoInventory,
       shopifyProductVariants: shopifyProductVariants,
       productsInDb,
     })
@@ -66,29 +83,33 @@ export class SchedulerService {
     requestFn: () => Promise<T>,
     maxRetries = 1,
   ): Promise<T> {
-    let retries = 0;
+    let retries = 0
     while (retries < maxRetries) {
       try {
-        return await requestFn();
+        return await requestFn()
       } catch (error) {
         if (error.response && error.response.status === 429) {
           // Assuming the API returns the delay in the response body in seconds
-          const retryDelay = error.response.data.time * 1000;
+          const retryDelay = error.response.data.time * 1000
           if (retryDelay > 0) {
-            retries++;
-            console.warn(`Request failed with status 429. Retrying in ${retryDelay}ms...`);
-            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+            retries++
+            console.warn(`Request failed with status 429. Retrying in ${retryDelay}ms...`)
+            await new Promise((resolve) => setTimeout(resolve, retryDelay))
           } else {
             // No valid retry delay found, log an error and break out of the loop.
-            console.error('Request failed with status 429, but no valid retry delay provided.');
-            throw new Error('Request failed with status 429, but no valid retry delay provided.');
+            console.error(
+              'Request failed with status 429, but no valid retry delay provided.',
+            )
+            throw new Error(
+              'Request failed with status 429, but no valid retry delay provided.',
+            )
           }
         } else {
           // For any other errors, rethrow and stop retrying.
-          throw error;
+          throw error
         }
       }
     }
-    throw new Error('Max retries exceeded');
+    throw new Error('Max retries exceeded')
   }
-  
+}

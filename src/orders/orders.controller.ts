@@ -20,6 +20,8 @@ export class OrdersController {
       return {
         ...product,
         isFractioned: productInDb.isFractioned,
+        isZap: productInDb.isZap,
+        isPanebras: productInDb.isPanebras,
       }
     })
 

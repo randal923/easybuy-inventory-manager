@@ -20,4 +20,12 @@ export class ShopifyProductInput {
   @Field(() => Boolean)
   @IsBoolean()
   isFractioned: boolean
+
+  @Field(() => Boolean)
+  @IsBoolean()
+  isZap: boolean
+
+  @Field(() => Boolean)
+  @IsBoolean()
+  isPanebras: boolean
 }

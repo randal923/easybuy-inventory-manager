@@ -25,7 +25,7 @@ export class ShopifyService {
         isFractioned,
         inventoryItemId,
         boaGestaoCurrentStock,
-        shopifyCurrentStock,
+        shopifyLaggingStock,
         packageQuantity,
         fractionedQuantity,
       } = mergedProduct
@@ -35,11 +35,11 @@ export class ShopifyService {
           return Math.round(
             boaGestaoCurrentStock * packageQuantity +
               fractionedQuantity -
-              shopifyCurrentStock,
+              shopifyLaggingStock,
           )
         }
 
-        return Math.round(boaGestaoCurrentStock - shopifyCurrentStock)
+        return Math.round(boaGestaoCurrentStock - shopifyLaggingStock)
       }
 
       await this.apolloClient.mutate({

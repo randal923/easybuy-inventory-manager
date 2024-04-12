@@ -64,7 +64,7 @@ export const mergeProductsAndInventory = (
         if (isFractioned) {
           return (
             currentStock * boaGestaoProduct.QuantidadePacote +
-            productInDb.fractionedQuantity
+            (productInDb?.fractionedQuantity ?? 0)
           )
         }
 
@@ -78,6 +78,7 @@ export const mergeProductsAndInventory = (
           boaGestaoInventoryItem.EstoqueAtual -
           Math.abs(boaGestaoInventoryItem.PrevisaoSaida),
         shopifyCurrentStock: calculateShopifyCurrentStock(),
+        shopifyLaggingStock: variant.inventoryQuantity,
         inventoryItemId: variant.inventoryItem.id,
         fractionedQuantity: productInDb?.fractionedQuantity ?? 0,
         isFractioned,

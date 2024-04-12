@@ -65,6 +65,7 @@ type Query {
 type Mutation {
   placeOrder(shopifyOrderInput: ShopifyOrderInput!): PlaceOrderResponseDto!
   subscribeToOrderPaidWebhook: SubscribeToOrderPaidWebhookResponseDto!
+  setProductFractionedQuantity(SetProductFractionedQuantityInput: SetProductFractionedQuantityInput!): Product!
 }
 
 input ShopifyOrderInput {
@@ -75,4 +76,11 @@ input ShopifyProductInput {
   sku: String!
   quantity: Int!
   isFractioned: Boolean!
+  isZap: Boolean!
+  isPanebras: Boolean!
+}
+
+input SetProductFractionedQuantityInput {
+  sku: String!
+  fractionedQuantity: Int!
 }

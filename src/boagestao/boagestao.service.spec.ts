@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { BoagestaoService } from './boagestao.service'
 import { HttpService } from '../http/http.service'
+import { AxiosHeaders } from 'axios'
 
 describe('BoagestaoService', () => {
   let boaGestaoService: BoagestaoService
@@ -29,7 +30,8 @@ describe('BoagestaoService', () => {
 
   it('should get all products by SKU findProductsBySkus', async () => {
     const skus = ['EB123', 'EB456']
-    const products = await boaGestaoService.findProductsBySkus(skus)
+    const headers = new AxiosHeaders()
+    const products = await boaGestaoService.findProductsBySkus(skus, headers)
 
     expect(products).toBeDefined()
     expect(products).toHaveLength(2)

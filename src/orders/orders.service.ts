@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { ShopifyOrderInput } from '../orders/dtos/shopify-order-input.dto'
 import { BoagestaoService } from '../boagestao/boagestao.service'
+import { AxiosHeaders } from 'axios'
 
 @Injectable()
 export class OrdersService {
@@ -11,12 +12,34 @@ export class OrdersService {
   ) {}
 
   async placeOrder(shopifyOrderInput: ShopifyOrderInput) {
-    const skus = this.getProductsSkus(shopifyOrderInput)
-    const boaGestaoProducts = await this.boaGestaoService.findProductsBySkus(skus)
+    const { panebrasSkus, zapSkus } = this.getProductsSkus(shopifyOrderInput)
 
-    const orderInput = await this.getOrderInput(boaGestaoProducts, shopifyOrderInput)
+    const panebrasHeaders = new AxiosHeaders({
+      Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
+    })
 
-    if (orderInput.items.length === 0) {
+    const zapHeaders = new AxiosHeaders({
+      Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
+    })
+
+    const panebrasProducts = await this.boaGestaoService.findProductsBySkus(
+      panebrasSkus,
+      panebrasHeaders,
+    )
+
+    const zapProducts = await this.boaGestaoService.findProductsBySkus(
+      zapSkus,
+      zapHeaders,
+    )
+
+    const panebrasOrderInput = await this.getOrderInput(
+      panebrasProducts,
+      shopifyOrderInput,
+    )
+
+    const zapOrderInput = await this.getOrderInput(zapProducts, shopifyOrderInput)
+
+    if (panebrasOrderInput.items.length === 0 && zapOrderInput.items.length === 0) {
       return {
         status: 200,
         message:
@@ -24,8 +47,22 @@ export class OrdersService {
       }
     }
 
-    const response = await this.boaGestaoService.placeOrder(orderInput)
-    return response
+    const panebrasOrderResponse = await this.boaGestaoService.placeOrder(
+      panebrasOrderInput,
+      panebrasHeaders,
+    )
+
+    const zapOrderResponse = await this.boaGestaoService.placeOrder(
+      zapOrderInput,
+      zapHeaders,
+    )
+
+    return {
+      status: 200,
+      message: 'Order placed on Boa Gestão',
+      iat: new Date().toISOString(),
+      id: `${panebrasOrderResponse.id}, ${zapOrderResponse.id}`,
+    }
   }
 
   async getOrderInput(
@@ -75,7 +112,15 @@ export class OrdersService {
   }
 
   getProductsSkus(shopifyOrderInput: ShopifyOrderInput) {
-    return shopifyOrderInput.products.map((product) => product.sku)
+    const panebrasSkus = shopifyOrderInput.products
+      .filter((product) => product.isPanebras === true)
+      .map((product) => product.sku)
+
+    const zapSkus = shopifyOrderInput.products
+      .filter((product) => product.isZap === true)
+      .map((product) => product.sku)
+
+    return { panebrasSkus, zapSkus }
   }
 
   async getOrderItems(

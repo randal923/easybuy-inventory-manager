@@ -85,6 +85,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     })
   }
 
+  async setProductFractionedQuantity(sku: string, fractionedQuantity: number) {
+    return this.product.update({
+      where: { sku },
+      data: { fractionedQuantity },
+    })
+  }
+
   async findProductsBySkus(skus: string[]): Promise<Product[]> {
     return this.product.findMany({
       where: {
