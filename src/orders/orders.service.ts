@@ -39,14 +39,6 @@ export class OrdersService {
 
     const zapOrderInput = await this.getOrderInput(zapProducts, shopifyOrderInput)
 
-    if (panebrasOrderInput.items.length === 0 && zapOrderInput.items.length === 0) {
-      return {
-        status: 200,
-        message:
-          'No order placed on Boa Gestão because there was enough fractioned items for this order',
-      }
-    }
-
     const panebrasOrderResponse = await this.boaGestaoService.placeOrder(
       panebrasOrderInput,
       panebrasHeaders,
@@ -61,7 +53,7 @@ export class OrdersService {
       status: 200,
       message: 'Order placed on Boa Gestão',
       iat: new Date().toISOString(),
-      id: `${panebrasOrderResponse.id}, ${zapOrderResponse.id}`,
+      id: `${panebrasOrderResponse?.id}, ${zapOrderResponse?.id}`,
     }
   }
 
@@ -69,6 +61,8 @@ export class OrdersService {
     boaGestaoProducts: BoaGestaoProduct[],
     shopifyOrderInput: ShopifyOrderInput,
   ) {
+    if (boaGestaoProducts.length === 0) return
+
     const dateTime = new Date().toISOString()
     const clientId = 26
     const items = await this.getOrderItems(boaGestaoProducts, shopifyOrderInput)
@@ -145,7 +139,7 @@ export class OrdersService {
       const isFractioned = shopifyProduct.isFractioned
       const productInDb = await this.prismaService.findProductBySku(shopifyProduct.sku)
       const isThereFractionedProductForThisSku =
-        await this.prismaService.findProductBySku(`FR${shopifyProduct.sku}`)
+        await this.prismaService.findProductBySku(`FR-${shopifyProduct.sku}`)
 
       const isThereNonFractionedProductForThisSku = shopifyProduct.sku.startsWith('FR-')
         ? await this.prismaService.findProductBySku(

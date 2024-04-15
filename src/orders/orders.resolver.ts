@@ -56,11 +56,6 @@ export class OrdersResolver {
         },
       )
 
-      // Filter products by SKU for testing purposes
-      const filteredProducts = boaGestaoProducts.data.rows.filter(
-        (product) => product.SKU === '25501' || product.SKU === '25500',
-      )
-
       const boaGestaoInventory = await this.httpService.get<BoaGestaoInventoryResponse>(
         BOA_GESTAO_INVENTORY_URL,
         {
@@ -75,7 +70,7 @@ export class OrdersResolver {
       const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
 
       const mergedProducts = mergeProductsAndInventory({
-        boaGestaoProducts: filteredProducts,
+        boaGestaoProducts: boaGestaoProducts.data.rows,
         boaGestaoInventoryRows: boaGestaoInventory.data.rows,
         shopifyProductVariants: shopifyProductVariants,
         productsInDb,

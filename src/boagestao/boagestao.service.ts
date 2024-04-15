@@ -15,7 +15,7 @@ export class BoagestaoService {
     orderInput: OrderInput,
     headers: AxiosHeaders,
   ): Promise<OrderResponse> {
-    if (!orderInput) return
+    if (!orderInput || orderInput?.items.length === 0) return
 
     const orderUrl = 'https://boagestao.app/api/pedido'
 
@@ -36,6 +36,7 @@ export class BoagestaoService {
       headers,
     })
 
-    return response.data.rows
+    const filteredSkus = response.data.rows.filter((row) => skus.includes(row.SKU))
+    return filteredSkus
   }
 }

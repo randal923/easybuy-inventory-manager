@@ -19,7 +19,7 @@ export class SchedulerService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  @Interval(50000)
+  @Interval(15000000)
   async handleInterval() {
     console.info('Updating stock levels...')
     const panebrasHeaders = {
