@@ -29,19 +29,21 @@ export class ShopifyService {
         packageQuantity,
         fractionedQuantity,
       } = mergedProduct
+      console.log(mergedProduct)
 
       const delta = () => {
         if (isFractioned) {
-          return Math.round(
+          return (
             boaGestaoCurrentStock * packageQuantity +
-              fractionedQuantity -
-              shopifyLaggingStock,
+            fractionedQuantity -
+            Math.abs(shopifyLaggingStock)
           )
         }
 
-        return Math.round(boaGestaoCurrentStock - shopifyLaggingStock)
+        return boaGestaoCurrentStock - Math.abs(shopifyLaggingStock)
       }
 
+      console.log(delta())
       await this.apolloClient.mutate({
         mutation: productQuantityMutation,
         variables: {

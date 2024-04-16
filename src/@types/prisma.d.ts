@@ -6,7 +6,7 @@ interface MergedProduct {
   packageQuantity: number
   fractionedQuantity: number
   shopifyCurrentStock: number
-  shopifyLaggingStock: number
+  shopifyLaggingStock?: number
   inventoryItemId: string
   boaGestaoCurrentStock: number
   isFractioned: boolean

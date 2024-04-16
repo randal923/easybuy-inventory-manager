@@ -71,7 +71,7 @@ export const mergeProductsAndInventory = (
         return currentStock
       }
 
-      const productVariant: ProductWithoutId = {
+      const productVariant = {
         sku: variant.sku,
         packageQuantity: boaGestaoProduct.QuantidadePacote,
         boaGestaoCurrentStock:
