@@ -108,11 +108,15 @@ export class OrdersService {
   getProductsSkus(shopifyOrderInput: ShopifyOrderInput) {
     const panebrasSkus = shopifyOrderInput.products
       .filter((product) => product.isPanebras === true)
-      .map((product) => product.sku)
+      .map((product) =>
+        product.sku.startsWith('FR-') ? product.sku.substring(3) : product.sku,
+      )
 
     const zapSkus = shopifyOrderInput.products
       .filter((product) => product.isZap === true)
-      .map((product) => product.sku)
+      .map((product) =>
+        product.sku.startsWith('FR-') ? product.sku.substring(3) : product.sku,
+      )
 
     return { panebrasSkus, zapSkus }
   }
