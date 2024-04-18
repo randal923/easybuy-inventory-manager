@@ -44,29 +44,34 @@ export class SchedulerService {
 
       const [panebrasProducts, zapProducts, panebrasInventory, zapInventory] =
         await Promise.all([
-          this.httpService.get<BoaGestaoProductsResponse>(BOA_GESTAO_PRODUCTS_URL, {
-            headers: panebrasHeaders,
-          }),
-          this.httpService.get<BoaGestaoProductsResponse>(BOA_GESTAO_PRODUCTS_URL, {
-            headers: zapHeaders,
-          }),
-          this.httpService.get<BoaGestaoInventoryResponse>(BOA_GESTAO_INVENTORY_URL, {
-            headers: panebrasHeaders,
-          }),
-          this.httpService.get<BoaGestaoInventoryResponse>(BOA_GESTAO_INVENTORY_URL, {
-            headers: zapHeaders,
-          }),
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
+            BOA_GESTAO_PRODUCTS_URL,
+            {
+              headers: panebrasHeaders,
+            },
+          ),
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
+            BOA_GESTAO_PRODUCTS_URL,
+            {
+              headers: zapHeaders,
+            },
+          ),
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
+            BOA_GESTAO_INVENTORY_URL,
+            {
+              headers: panebrasHeaders,
+            },
+          ),
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
+            BOA_GESTAO_INVENTORY_URL,
+            {
+              headers: zapHeaders,
+            },
+          ),
         ])
 
-      const mergedBoaGestaoProducts = [
-        ...panebrasProducts.data.rows,
-        ...zapProducts.data.rows,
-      ]
-
-      const mergedBoaGestaoInventory = [
-        ...panebrasInventory.data.rows,
-        ...zapInventory.data.rows,
-      ]
+      const mergedBoaGestaoProducts = [...panebrasProducts, ...zapProducts]
+      const mergedBoaGestaoInventory = [...panebrasInventory, ...zapInventory]
 
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
       const skus = shopifyProductVariants.map((variant) => variant.sku)

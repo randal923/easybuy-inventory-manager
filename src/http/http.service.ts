@@ -24,4 +24,34 @@ export class HttpService {
       throw error
     }
   }
+
+  async fetchAllBoaGestaoPages<T>(
+    url: string,
+    config: AxiosRequestConfig = {},
+  ): Promise<T[]> {
+    try {
+      let page = 1
+      let allResults: T[] = []
+      let fetchNextPage = true
+
+      while (fetchNextPage) {
+        const response = await axios.get<{
+          page: number
+          pagecount: number
+          rows: T[]
+        }>(`${url}?page=${page}`, config)
+        allResults = allResults.concat(response.data.rows)
+
+        if (page < response.data.pagecount) {
+          page++
+        } else {
+          fetchNextPage = false
+        }
+      }
+
+      return allResults
+    } catch (error) {
+      throw error
+    }
+  }
 }
