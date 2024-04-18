@@ -1,3 +1,12 @@
+interface BoaGestaoProductsResponse {
+  iat: number
+  page: number
+  pagecount: number
+  limit: number
+  records: number
+  rows: BoaGestaoProduct[]
+}
+
 interface BoaGestaoProduct {
   Id: number
   Tipo: number
@@ -18,6 +27,15 @@ interface BoaGestaoProduct {
   UnidadeItem: string | null
   ImagemId: number | null
   ImagemURL: string | null
+}
+
+interface BoaGestaoInventoryResponse {
+  iat: number
+  page: number
+  pagecount: number
+  limit: number
+  records: number
+  rows: BoaGestaoInventoryItem[]
 }
 
 interface BoaGestaoInventoryItem {
