@@ -22,12 +22,17 @@ export const mergeProductsAndInventory = (
 
   for (const boaGestaoProduct of boaGestaoProducts) {
     const shopifyVariants = shopifyProductVariants.filter((variant) => {
-      const cleanedSku = variant.sku ? variant.sku.replace('FR-', '') : null
+      if (!variant.sku) return false
+
+      const cleanedSku = variant.sku.replace('FR-', '')
+
       return (
         variant.sku === boaGestaoProduct.SKU ||
         (cleanedSku && cleanedSku === boaGestaoProduct.SKU)
       )
     })
+
+    if (shopifyVariants.length === 0) continue
 
     const boaGestaoInventoryItem = boaGestaoInventoryRows.find(
       (inv) => inv.ProdutoId === boaGestaoProduct.Id,

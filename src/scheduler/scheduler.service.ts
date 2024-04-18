@@ -13,7 +13,7 @@ import { PrismaService } from 'src/prisma/prisma.service'
 export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name)
   private taskScheduled: NodeJS.Timeout
-  private timer = 61000
+  private timer = 11000
 
   constructor(
     private readonly httpService: HttpService,
@@ -61,7 +61,7 @@ export class SchedulerService {
       const mergedBoaGestaoProducts = [
         ...panebrasProducts.data.rows,
         ...zapProducts.data.rows,
-      ].filter((row) => row.SKU === 'LACTA-0001-0001' || row.SKU === 'LACTA-0001-0002')
+      ]
 
       const mergedBoaGestaoInventory = [
         ...panebrasInventory.data.rows,
@@ -79,6 +79,8 @@ export class SchedulerService {
         shopifyProductVariants: shopifyProductVariants,
         productsInDb,
       })
+
+      if (mergedProducts.length === 0) return
 
       await this.productsService.upsertProduct(mergedProducts)
       await this.shopifyService.updateStockLevels(mergedProducts)
