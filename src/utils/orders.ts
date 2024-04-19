@@ -20,3 +20,15 @@ export function translateOrderItemToPortuguese(item: ItemsInput): PortugueseItem
     Total: item.total,
   }
 }
+
+export function removeDuplicates<T extends Record<string, any>>(
+  arr: T[],
+  key: keyof T,
+): T[] {
+  return arr.reduce((acc: T[], curr: T) => {
+    if (!acc.some((obj: T) => obj[key] === curr[key])) {
+      acc.push(curr)
+    }
+    return acc
+  }, [])
+}

@@ -35,11 +35,11 @@ export class ShopifyService {
           return (
             boaGestaoCurrentStock * packageQuantity +
             fractionedQuantity -
-            Math.abs(shopifyLaggingStock)
+            shopifyLaggingStock
           )
         }
 
-        return boaGestaoCurrentStock - Math.abs(shopifyLaggingStock)
+        return boaGestaoCurrentStock - shopifyLaggingStock
       }
 
       await this.apolloClient.mutate({

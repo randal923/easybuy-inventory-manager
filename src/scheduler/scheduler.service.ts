@@ -8,6 +8,7 @@ import { mergeProductsAndInventory } from '../utils/boa-gestao'
 import { ProductsService } from 'src/products/services/products.service'
 import { ShopifyService } from 'src/shopify/shopify.service'
 import { PrismaService } from 'src/prisma/prisma.service'
+import { removeDuplicates } from '@src/utils/orders'
 
 @Injectable()
 export class SchedulerService {
@@ -87,8 +88,9 @@ export class SchedulerService {
 
       if (mergedProducts.length === 0) return
 
-      await this.productsService.upsertProduct(mergedProducts)
-      await this.shopifyService.updateStockLevels(mergedProducts)
+      const undiplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
+      await this.productsService.upsertProduct(undiplicatedMergedProducts)
+      await this.shopifyService.updateStockLevels(undiplicatedMergedProducts)
     } catch (error) {
       if (error.response && error.response.status === 429) {
         const retryAfter = error.response.data.time
