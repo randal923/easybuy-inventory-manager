@@ -24,7 +24,7 @@ export const mergeProductsAndInventory = (
     const shopifyVariants = shopifyProductVariants.filter((variant) => {
       if (!variant.sku) return false
 
-      const cleanedSku = variant.sku.replace('FR-', '')
+      const cleanedSku = variant.sku.substring(3)
 
       return (
         variant.sku === boaGestaoProduct.SKU ||

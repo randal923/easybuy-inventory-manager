@@ -75,8 +75,11 @@ export class SchedulerService {
       const mergedBoaGestaoInventory = [...panebrasInventory, ...zapInventory]
 
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
+      this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
+
       const skus = shopifyProductVariants.map((variant) => variant.sku)
       const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
+
       const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
 
       const mergedProducts = mergeProductsAndInventory({
@@ -88,9 +91,10 @@ export class SchedulerService {
 
       if (mergedProducts.length === 0) return
 
-      const undiplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
-      await this.productsService.upsertProduct(undiplicatedMergedProducts)
-      await this.shopifyService.updateStockLevels(undiplicatedMergedProducts)
+      const unduplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
+
+      await this.productsService.upsertProduct(unduplicatedMergedProducts)
+      await this.shopifyService.updateStockLevels(unduplicatedMergedProducts)
     } catch (error) {
       if (error.response && error.response.status === 429) {
         const retryAfter = error.response.data.time
@@ -103,5 +107,49 @@ export class SchedulerService {
     }
 
     this.scheduleTask(this.timer)
+  }
+
+  checkForInvalidSkus(variants: VariantNode[], boaGestaoProducts: BoaGestaoProduct[]) {
+    const boaGestaoSkus = new Map(
+      boaGestaoProducts.map((product) => [product.SKU, product]),
+    )
+
+    let invalidSkusCount = 0
+
+    for (const variant of variants) {
+      if (!variant.sku || variant.sku.trim().length === 0) {
+        this.logger.warn(
+          `Product with invalid SKU in Shopify: title: ${JSON.stringify(variant.title)}, sku: ${JSON.stringify(variant.sku)}`,
+        )
+        invalidSkusCount++
+        continue
+      }
+
+      const matchSkuWithBoaGestao = variant.sku.startsWith('FR-')
+        ? variant.sku.substring(3)
+        : variant.sku
+
+      const boaGestaoProduct = boaGestaoSkus.get(matchSkuWithBoaGestao)
+
+      if (!boaGestaoProduct) {
+        this.logger.warn(
+          `SKU mismatch: No matching product in Boa Gestão for Shopify SKU: ${variant.sku}`,
+        )
+        invalidSkusCount++
+        continue
+      }
+
+      if (boaGestaoProduct.SKU !== matchSkuWithBoaGestao) {
+        this.logger.warn(
+          `SKU mismatch: Shopify SKU ${variant.sku} differs from Boa Gestão SKU ${boaGestaoProduct.SKU} for product title ${variant.title}`,
+        )
+        invalidSkusCount++
+        continue
+      }
+    }
+
+    if (invalidSkusCount > 0) {
+      this.logger.log(`${invalidSkusCount} products have invalid SKUs.`)
+    }
   }
 }

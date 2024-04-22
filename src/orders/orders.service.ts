@@ -107,13 +107,13 @@ export class OrdersService {
 
   getProductsSkus(shopifyOrderInput: ShopifyOrderInput) {
     const panebrasSkus = shopifyOrderInput.products
-      .filter((product) => product.isPanebras === true)
+      .filter((product) => product.sku && product.isPanebras === true)
       .map((product) =>
         product.sku.startsWith('FR-') ? product.sku.substring(3) : product.sku,
       )
 
     const zapSkus = shopifyOrderInput.products
-      .filter((product) => product.isZap === true)
+      .filter((product) => product.sku && product.isZap === true)
       .map((product) =>
         product.sku.startsWith('FR-') ? product.sku.substring(3) : product.sku,
       )
@@ -145,10 +145,8 @@ export class OrdersService {
       const isThereFractionedProductForThisSku =
         await this.prismaService.findProductBySku(`FR-${shopifyProduct.sku}`)
 
-      const isThereNonFractionedProductForThisSku = shopifyProduct.sku.startsWith('FR-')
-        ? await this.prismaService.findProductBySku(
-            shopifyProduct.sku.replace(/FR-/g, ''),
-          )
+      const isThereNonFractionedProductForThisSku = shopifyProduct.sku?.startsWith('FR-')
+        ? await this.prismaService.findProductBySku(shopifyProduct.sku.substring(3))
         : false
       const isFractionedQuantityEnough =
         productInDb.fractionedQuantity >= shopifyProduct.quantity
