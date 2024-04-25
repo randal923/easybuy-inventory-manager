@@ -49,3 +49,11 @@ model OrderItem {
   orderId    Int
   order      Order   @relation(fields: [orderId], references: [id])
 }
+
+model OrderQueue {
+  id            Int       @id @default(autoincrement())
+  orderData     String      
+  createdAt     DateTime  @default(now())
+  processed     Boolean   @default(false)
+  processedAt   DateTime? 
+}

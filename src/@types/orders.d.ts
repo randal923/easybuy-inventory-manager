@@ -116,6 +116,7 @@ interface OrderPaid {
   refunds: any[]
   shipping_address: Address
   shipping_lines: ShippingLine[]
+  [key: string]: any
 }
 interface MoneySet {
   shop_money: Money

@@ -101,4 +101,28 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       },
     })
   }
+
+  async enqueueOrder(orderData: OrderPaid) {
+    return this.orderQueue.create({
+      data: {
+        orderData: JSON.stringify(orderData),
+      },
+    })
+  }
+
+  async fetchUnprocessedOrders(batchSize: number) {
+    return this.orderQueue.findMany({
+      where: {
+        processed: false,
+      },
+      take: batchSize,
+    })
+  }
+
+  async markOrderAsProcessed(id: number) {
+    return this.orderQueue.update({
+      where: { id },
+      data: { processed: true, processedAt: new Date() },
+    })
+  }
 }

@@ -75,7 +75,7 @@ export class SchedulerService {
       const mergedBoaGestaoInventory = [...panebrasInventory, ...zapInventory]
 
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
-      this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
+      // this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
 
       const skus = shopifyProductVariants.map((variant) => variant.sku)
       const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
