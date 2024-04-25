@@ -15,13 +15,13 @@ export class OrdersController {
 
   @Post('paid')
   async enqueueOrders(@Body() body: OrderPaid) {
-    console.log('Received order request', body)
     await this.prismaService.enqueueOrder(body)
     return { message: 'Order enqueued successfully!' }
   }
 
   async processOrders() {
     const orders = await this.prismaService.fetchUnprocessedOrders(2)
+
     orders.forEach(async (order) => {
       if (!order) return
       const orderData = JSON.parse(order.orderData) as OrderPaid
