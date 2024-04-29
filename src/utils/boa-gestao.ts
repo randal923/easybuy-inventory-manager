@@ -86,6 +86,8 @@ export const mergeProductsAndInventory = (
         shopifyLaggingStock: variant.inventoryQuantity,
         inventoryItemId: variant.inventoryItem.id,
         fractionedQuantity: productInDb?.fractionedQuantity ?? 0,
+        unityPrice: calculateUnityPrice(isFractioned, boaGestaoProduct),
+        unityCost: calculateUnityCost(isFractioned, boaGestaoProduct),
         isFractioned,
         isZap,
         isPanebras,
@@ -96,4 +98,37 @@ export const mergeProductsAndInventory = (
   }
 
   return mergedProducts
+}
+
+export const calculateUnityPrice = (
+  isFractioned: boolean,
+  boaGestaoProduct: BoaGestaoProduct,
+): number => {
+  const shopifyMargin = Number(process.env.SHOPIFY_PRICE_MARKUP) ?? 30
+  const costPrice = boaGestaoProduct.PrecoVista
+  const productQuantity = boaGestaoProduct.QuantidadePacote
+
+  const calculatePriceWithMargin = (price: number) => {
+    const finalPrice = price / (1 - shopifyMargin / 100)
+    return parseFloat(finalPrice.toFixed(2))
+  }
+
+  if (isFractioned) {
+    const unitCost = costPrice / productQuantity
+    return calculatePriceWithMargin(unitCost)
+  }
+
+  return calculatePriceWithMargin(costPrice)
+}
+
+export const calculateUnityCost = (
+  isFractioned: boolean,
+  boaGestaoProduct: BoaGestaoProduct,
+) => {
+  if (isFractioned) {
+    const unitCost = boaGestaoProduct.PrecoVista / boaGestaoProduct.QuantidadePacote
+    return parseFloat(unitCost.toFixed(2))
+  }
+
+  return parseFloat(boaGestaoProduct.PrecoVista.toFixed(2))
 }

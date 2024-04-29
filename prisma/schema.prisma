@@ -20,6 +20,8 @@ model Product {
   shopifyCurrentStock     Int?
   boaGestaoCurrentStock   Int?
   fractionedQuantity      Int?
+  unityPrice              Float?                   
+  unityCost               Float?                   
   inventoryItemId         String?
   isFractioned            Boolean?
   isZap                   Boolean?

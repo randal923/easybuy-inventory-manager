@@ -8,6 +8,12 @@ interface Data {
 
 interface ShopifyProducts {
   edges: ShopifyProductEdge[]
+  pageInfo: {
+    endCursor: string
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    startCursor: string
+  }
 }
 
 interface ShopifyProductEdge {
@@ -36,8 +42,12 @@ interface VariantNode {
   title: string
   inventoryQuantity: number
   sku: string
+  price: string
   inventoryItem: {
     id: string
+    unitCost: {
+      amount: string
+    }
   }
   metafields: {
     edges: MetafieldEdge[]

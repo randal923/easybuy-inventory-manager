@@ -14,10 +14,14 @@ export const fetchProductsQuery = gql`
               node {
                 id
                 title
+                price
                 inventoryQuantity
                 sku
                 inventoryItem {
                   id
+                  unitCost {
+                    amount
+                  }
                 }
                 metafields(first: 20) {
                   edges {
@@ -32,6 +36,12 @@ export const fetchProductsQuery = gql`
           }
         }
       }
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
+      }
     }
   }
 `
@@ -41,6 +51,21 @@ export const productQuantityMutation = gql`
     inventoryAdjustQuantities(input: $input) {
       inventoryAdjustmentGroup {
         id
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`
+
+export const updateProductVariant = gql`
+  mutation productVariantUpdate($input: ProductVariantInput!) {
+    productVariantUpdate(input: $input) {
+      productVariant {
+        id
+        price
       }
       userErrors {
         field

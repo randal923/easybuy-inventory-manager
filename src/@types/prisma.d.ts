@@ -9,6 +9,8 @@ interface MergedProduct {
   shopifyLaggingStock?: number
   inventoryItemId: string
   boaGestaoCurrentStock: number
+  unityPrice: number
+  unityCost: number
   isFractioned: boolean
   isZap: boolean
   isPanebras: boolean

@@ -75,6 +75,7 @@ export class SchedulerService {
       const mergedBoaGestaoInventory = [...panebrasInventory, ...zapInventory]
 
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
+
       this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
 
       const skus = shopifyProductVariants.map((variant) => variant.sku)
@@ -89,10 +90,17 @@ export class SchedulerService {
         productsInDb,
       })
 
-      if (mergedProducts.length === 0) return
+      if (mergedProducts.length === 0) {
+        this.logger.warn('No products to update.')
+        return
+      }
 
       const unduplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
 
+      await this.shopifyService.updateProductVariantsPrices(
+        shopifyProductVariants,
+        unduplicatedMergedProducts,
+      )
       await this.productsService.upsertProduct(unduplicatedMergedProducts)
       await this.shopifyService.updateStockLevels(unduplicatedMergedProducts)
     } catch (error) {
