@@ -84,6 +84,16 @@ export class ShopifyService {
       const shopifyVariantCost = Number(shopifyVariant.inventoryItem.unitCost.amount)
 
       if (
+        typeof mergedProduct.unityPrice !== 'number' ||
+        typeof mergedProduct.unityCost !== 'number'
+      ) {
+        this.logger.error(
+          `Product with SKU ${mergedProduct.sku} has invalid price or cost: ${mergedProduct.unityPrice} ${mergedProduct.unityCost}`,
+        )
+        continue
+      }
+
+      if (
         shopifyVariantPrice === mergedProduct.unityPrice &&
         shopifyVariantCost === mergedProduct.unityCost
       ) {
