@@ -104,7 +104,7 @@ export const calculateUnityPrice = (
   isFractioned: boolean,
   boaGestaoProduct: BoaGestaoProduct,
 ): number => {
-  const shopifyMargin = Number(process.env.SHOPIFY_PRICE_MARKUP) ?? 30
+  const shopifyMargin = Number(process.env.SHOPIFY_PRICE_MARKUP) || 30
   const costPrice = boaGestaoProduct.PrecoVista
   const productQuantity = boaGestaoProduct.QuantidadePacote
 

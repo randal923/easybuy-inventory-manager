@@ -70,6 +70,8 @@ export class ShopifyService {
     shopifyProductVariants: VariantNode[],
     mergedProducts: ProductWithoutId[],
   ) {
+    this.logger.log('Updating product prices...')
+
     for (const mergedProduct of mergedProducts) {
       const shopifyVariant = shopifyProductVariants.find(
         (variant) => variant.sku === mergedProduct.sku,
@@ -83,10 +85,7 @@ export class ShopifyService {
       const shopifyVariantPrice = Number(shopifyVariant.price)
       const shopifyVariantCost = Number(shopifyVariant.inventoryItem.unitCost.amount)
 
-      if (
-        typeof mergedProduct.unityPrice !== 'number' ||
-        typeof mergedProduct.unityCost !== 'number'
-      ) {
+      if (isNaN(mergedProduct.unityPrice) || isNaN(mergedProduct.unityCost)) {
         this.logger.error(
           `Product with SKU ${mergedProduct.sku} has invalid price or cost: ${mergedProduct.unityPrice} ${mergedProduct.unityCost}`,
         )
