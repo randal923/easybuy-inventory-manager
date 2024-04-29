@@ -12,59 +12,68 @@ export class OrdersService {
   ) {}
 
   async placeOrder(shopifyOrderInput: ShopifyOrderInput) {
-    const { panebrasSkus, zapSkus } = this.getProductsSkus(shopifyOrderInput)
+    try {
+      const { panebrasSkus, zapSkus } = this.getProductsSkus(shopifyOrderInput)
 
-    const panebrasHeaders = new AxiosHeaders({
-      Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
-    })
+      const panebrasHeaders = new AxiosHeaders({
+        Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
+      })
 
-    const zapHeaders = new AxiosHeaders({
-      Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
-    })
+      const zapHeaders = new AxiosHeaders({
+        Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
+      })
 
-    const panebrasProducts = await this.boaGestaoService.findProductsBySkus(
-      panebrasSkus,
-      panebrasHeaders,
-    )
+      const panebrasProducts = await this.boaGestaoService.findProductsBySkus(
+        panebrasSkus,
+        panebrasHeaders,
+      )
 
-    const zapProducts = await this.boaGestaoService.findProductsBySkus(
-      zapSkus,
-      zapHeaders,
-    )
+      const zapProducts = await this.boaGestaoService.findProductsBySkus(
+        zapSkus,
+        zapHeaders,
+      )
 
-    const panebrasOrderInput = await this.getOrderInput(
-      panebrasProducts,
-      shopifyOrderInput,
-    )
+      const panebrasOrderInput = await this.getOrderInput(
+        panebrasProducts,
+        shopifyOrderInput,
+        Number(process.env.EASYBUY_PANEBRAS_CLIENT_ID) || 0,
+      )
 
-    const zapOrderInput = await this.getOrderInput(zapProducts, shopifyOrderInput)
+      const zapOrderInput = await this.getOrderInput(
+        zapProducts,
+        shopifyOrderInput,
+        Number(process.env.EASYBUY_ZAP_CLIENT_ID) || 0,
+      )
 
-    const panebrasOrderResponse = await this.boaGestaoService.placeOrder(
-      panebrasOrderInput,
-      panebrasHeaders,
-    )
+      const panebrasOrderResponse = await this.boaGestaoService.placeOrder(
+        panebrasOrderInput,
+        panebrasHeaders,
+      )
 
-    const zapOrderResponse = await this.boaGestaoService.placeOrder(
-      zapOrderInput,
-      zapHeaders,
-    )
+      const zapOrderResponse = await this.boaGestaoService.placeOrder(
+        zapOrderInput,
+        zapHeaders,
+      )
 
-    return {
-      status: 200,
-      message: 'Order placed on Boa Gestão',
-      iat: new Date().toISOString(),
-      id: `${panebrasOrderResponse?.id}, ${zapOrderResponse?.id}`,
+      return {
+        status: 200,
+        message: 'Order placed on Boa Gestão',
+        iat: new Date().toISOString(),
+        id: `${panebrasOrderResponse?.id}, ${zapOrderResponse?.id}`,
+      }
+    } catch (error) {
+      console.error('Error placing order:', error)
     }
   }
 
   async getOrderInput(
     boaGestaoProducts: BoaGestaoProduct[],
     shopifyOrderInput: ShopifyOrderInput,
+    clientId: number,
   ) {
     if (boaGestaoProducts.length === 0) return
 
     const dateTime = new Date().toISOString()
-    const clientId = 26
     const items = await this.getOrderItems(boaGestaoProducts, shopifyOrderInput)
     const mergedItems = this.mergeSimilarItems(items)
 
