@@ -15,7 +15,6 @@ export class OrdersController {
 
   @Post('paid')
   async enqueueOrders(@Body() body: OrderPaid) {
-    console.log('Order received:', body)
     await this.prismaService.enqueueOrder(body)
     return { message: 'Order enqueued successfully!' }
   }

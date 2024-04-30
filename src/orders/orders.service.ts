@@ -75,6 +75,7 @@ export class OrdersService {
 
     const dateTime = new Date().toISOString()
     const items = await this.getOrderItems(boaGestaoProducts, shopifyOrderInput)
+
     const mergedItems = this.mergeSimilarItems(items)
 
     const total = mergedItems.reduce((acc, item) => acc + item?.total, 0)

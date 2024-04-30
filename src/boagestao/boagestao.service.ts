@@ -32,11 +32,14 @@ export class BoagestaoService {
   async findProductsBySkus(skus: string[], headers: AxiosHeaders) {
     const productsUrl = 'https://boagestao.app/api/produtos'
 
-    const response = await this.httpService.get<BoaGestaoProductsResponse>(productsUrl, {
-      headers,
-    })
+    const response = await this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
+      productsUrl,
+      {
+        headers,
+      },
+    )
 
-    const filteredSkus = response.data.rows.filter((row) => skus.includes(row.SKU))
+    const filteredSkus = response.filter((row) => skus.includes(row.SKU))
     return filteredSkus
   }
 }
