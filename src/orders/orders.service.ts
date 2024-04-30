@@ -19,7 +19,6 @@ export class OrdersService {
         Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
       })
 
-      console.log('panebrasHeaders', panebrasHeaders)
       const zapHeaders = new AxiosHeaders({
         Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
       })
@@ -29,7 +28,6 @@ export class OrdersService {
         panebrasHeaders,
       )
 
-      console.log('panebrasProducts', panebrasProducts)
       const zapProducts = await this.boaGestaoService.findProductsBySkus(
         zapSkus,
         zapHeaders,
@@ -40,7 +38,7 @@ export class OrdersService {
         shopifyOrderInput,
         Number(process.env.EASYBUY_PANEBRAS_CLIENT_ID) || 0,
       )
-      console.log('panebrasOrderInput', panebrasOrderInput)
+
       const zapOrderInput = await this.getOrderInput(
         zapProducts,
         shopifyOrderInput,
