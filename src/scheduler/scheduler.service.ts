@@ -71,9 +71,6 @@ export class SchedulerService {
           ),
         ])
 
-      const mergedBoaGestaoProducts = [...panebrasProducts, ...zapProducts]
-      const mergedBoaGestaoInventory = [...panebrasInventory, ...zapInventory]
-
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
 
       // this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
@@ -83,12 +80,21 @@ export class SchedulerService {
 
       const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
 
-      const mergedProducts = mergeProductsAndInventory({
-        boaGestaoProducts: mergedBoaGestaoProducts,
-        boaGestaoInventoryRows: mergedBoaGestaoInventory,
+      const mergedPanebrasProducts = mergeProductsAndInventory({
+        boaGestaoProducts: panebrasProducts,
+        boaGestaoInventoryRows: panebrasInventory,
         shopifyProductVariants: shopifyProductVariants,
         productsInDb,
       })
+
+      const mergedZapProducts = mergeProductsAndInventory({
+        boaGestaoProducts: zapProducts,
+        boaGestaoInventoryRows: zapInventory,
+        shopifyProductVariants: shopifyProductVariants,
+        productsInDb,
+      })
+
+      const mergedProducts = [...mergedPanebrasProducts, ...mergedZapProducts]
 
       if (mergedProducts.length === 0) {
         this.logger.warn('No products to update.')
