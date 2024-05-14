@@ -56,7 +56,7 @@ export class ShopifyService {
             changes: [
               {
                 inventoryItemId: inventoryItemId,
-                locationId: 'gid://shopify/Location/94867161382',
+                locationId: 'gid://shopify/Location/98213396774',
                 delta: delta(),
               },
             ],
@@ -83,7 +83,7 @@ export class ShopifyService {
       }
 
       const shopifyVariantPrice = Number(shopifyVariant.price)
-      const shopifyVariantCost = Number(shopifyVariant.inventoryItem.unitCost.amount)
+      const shopifyVariantCost = Number(shopifyVariant.inventoryItem?.unitCost?.amount)
 
       if (isNaN(mergedProduct.unityPrice) || isNaN(mergedProduct.unityCost)) {
         this.logger.error(
