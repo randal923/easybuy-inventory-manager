@@ -86,7 +86,7 @@ export const mergeProductsAndInventory = (
         shopifyLaggingStock: variant.inventoryQuantity,
         inventoryItemId: variant.inventoryItem.id,
         fractionedQuantity: productInDb?.fractionedQuantity ?? 0,
-        unityPrice: calculateUnityPrice(isFractioned, boaGestaoProduct),
+        unityPrice: calculateUnityPrice(isFractioned, boaGestaoProduct, isPanebras),
         unityCost: calculateUnityCost(isFractioned, boaGestaoProduct),
         isFractioned,
         isZap,
@@ -103,8 +103,11 @@ export const mergeProductsAndInventory = (
 export const calculateUnityPrice = (
   isFractioned: boolean,
   boaGestaoProduct: BoaGestaoProduct,
+  isPanebras: boolean,
 ): number => {
-  const shopifyMargin = Number(process.env.SHOPIFY_PRICE_MARKUP) || 30
+  const shopifyMargin = isPanebras
+    ? Number(process.env.SHOPIFY_PRICE_MARKUP_PANEBRAS)
+    : Number(process.env.SHOPIFY_PRICE_MARKUP_ZAP)
   const costPrice = boaGestaoProduct.PrecoVista
   const productQuantity = boaGestaoProduct.QuantidadePacote
 
