@@ -105,6 +105,7 @@ export const calculateUnityPrice = (
   boaGestaoProduct: BoaGestaoProduct,
   isPanebras: boolean,
 ): number => {
+  // Build the price with the margin
   const shopifyMargin = isPanebras
     ? Number(process.env.SHOPIFY_PRICE_MARKUP_PANEBRAS)
     : Number(process.env.SHOPIFY_PRICE_MARKUP_ZAP)
