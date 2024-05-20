@@ -30,6 +30,10 @@ export class BoagestaoService {
   }
 
   async findProductsBySkus(skus: string[], headers: AxiosHeaders) {
+    if (!skus || skus.length === 0) {
+      throw new Error('No skus provided in findProductsBySkus method')
+    }
+
     const productsUrl = 'https://boagestao.app/api/produtos'
 
     const response = await this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(

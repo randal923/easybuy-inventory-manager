@@ -93,6 +93,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async findProductsBySkus(skus: string[]): Promise<Product[]> {
+    if (!skus || skus.length === 0) {
+      throw new Error('No skus provided in findProductsBySkus Prisma method')
+    }
+
     return this.product.findMany({
       where: {
         sku: {
