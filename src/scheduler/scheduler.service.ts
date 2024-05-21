@@ -36,79 +36,78 @@ export class SchedulerService {
   async handleInterval() {
     try {
       this.logger.log('Updating stock levels...')
-      // const panebrasHeaders = {
-      //   Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
-      // }
-      // const zapHeaders = {
-      //   Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
-      // }
+      const panebrasHeaders = {
+        Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
+      }
+      const zapHeaders = {
+        Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
+      }
 
-      // const [panebrasProducts, zapProducts, panebrasInventory, zapInventory] =
-      //   await Promise.all([
-      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
-      //       BOA_GESTAO_PRODUCTS_URL,
-      //       {
-      //         headers: panebrasHeaders,
-      //       },
-      //     ),
-      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
-      //       BOA_GESTAO_PRODUCTS_URL,
-      //       {
-      //         headers: zapHeaders,
-      //       },
-      //     ),
-      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
-      //       BOA_GESTAO_INVENTORY_URL,
-      //       {
-      //         headers: panebrasHeaders,
-      //       },
-      //     ),
-      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
-      //       BOA_GESTAO_INVENTORY_URL,
-      //       {
-      //         headers: zapHeaders,
-      //       },
-      //     ),
-      //   ])
+      const [panebrasProducts, zapProducts, panebrasInventory, zapInventory] =
+        await Promise.all([
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
+            BOA_GESTAO_PRODUCTS_URL,
+            {
+              headers: panebrasHeaders,
+            },
+          ),
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
+            BOA_GESTAO_PRODUCTS_URL,
+            {
+              headers: zapHeaders,
+            },
+          ),
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
+            BOA_GESTAO_INVENTORY_URL,
+            {
+              headers: panebrasHeaders,
+            },
+          ),
+          this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
+            BOA_GESTAO_INVENTORY_URL,
+            {
+              headers: zapHeaders,
+            },
+          ),
+        ])
 
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
       // this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
 
-      console.log('shopifyProductVariants', shopifyProductVariants)
-      // const skus = shopifyProductVariants.map((variant) => variant.sku)
-      // const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
+      const skus = shopifyProductVariants.map((variant) => variant.sku)
+      const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
 
-      // const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
+      const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
 
-      // const mergedPanebrasProducts = mergeProductsAndInventory({
-      //   boaGestaoProducts: panebrasProducts,
-      //   boaGestaoInventoryRows: panebrasInventory,
-      //   shopifyProductVariants: shopifyProductVariants,
-      //   productsInDb,
-      // })
+      const mergedPanebrasProducts = mergeProductsAndInventory({
+        boaGestaoProducts: panebrasProducts,
+        boaGestaoInventoryRows: panebrasInventory,
+        shopifyProductVariants: shopifyProductVariants,
+        productsInDb,
+      })
 
-      // const mergedZapProducts = mergeProductsAndInventory({
-      //   boaGestaoProducts: zapProducts,
-      //   boaGestaoInventoryRows: zapInventory,
-      //   shopifyProductVariants: shopifyProductVariants,
-      //   productsInDb,
-      // })
+      const mergedZapProducts = mergeProductsAndInventory({
+        boaGestaoProducts: zapProducts,
+        boaGestaoInventoryRows: zapInventory,
+        shopifyProductVariants: shopifyProductVariants,
+        productsInDb,
+      })
 
-      // const mergedProducts = [...mergedPanebrasProducts, ...mergedZapProducts]
+      const mergedProducts = [...mergedPanebrasProducts, ...mergedZapProducts]
 
-      // if (mergedProducts.length === 0) {
-      //   this.logger.warn('No products to update.')
-      //   return
-      // }
+      if (mergedProducts.length === 0) {
+        this.logger.warn('No products to update.')
+        return
+      }
 
-      // const unduplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
+      const unduplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
 
-      // await this.shopifyService.updateProductVariantsPrices(
-      //   shopifyProductVariants,
-      //   unduplicatedMergedProducts,
-      // )
-      // await this.productsService.upsertProduct(unduplicatedMergedProducts)
-      // await this.shopifyService.updateStockLevels(unduplicatedMergedProducts)
+      await this.shopifyService.updateProductVariantsPrices(
+        shopifyProductVariants,
+        unduplicatedMergedProducts,
+      )
+      await this.productsService.upsertProduct(unduplicatedMergedProducts)
+      await this.shopifyService.updateStockLevels(unduplicatedMergedProducts)
     } catch (error) {
       if (error.response && error.response.status === 429) {
         const retryAfter = error.response.data.time
