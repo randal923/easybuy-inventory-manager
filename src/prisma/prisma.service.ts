@@ -97,13 +97,19 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       throw new Error('No skus provided in findProductsBySkus Prisma method')
     }
 
-    return this.product.findMany({
-      where: {
-        sku: {
-          in: skus,
+    try {
+      const products = await this.prisma.product.findMany({
+        where: {
+          sku: {
+            in: skus,
+          },
         },
-      },
-    })
+      })
+
+      return products
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    }
   }
 
   async enqueueOrder(orderData: OrderPaid) {
