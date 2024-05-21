@@ -36,40 +36,40 @@ export class SchedulerService {
   async handleInterval() {
     try {
       this.logger.log('Updating stock levels...')
-      const panebrasHeaders = {
-        Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
-      }
-      const zapHeaders = {
-        Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
-      }
+      // const panebrasHeaders = {
+      //   Authorization: `Bearer ${process.env.BOA_GESTAO_PANEBRAS_API_KEY}`,
+      // }
+      // const zapHeaders = {
+      //   Authorization: `Bearer ${process.env.BOA_GESTAO_ZAP_API_KEY}`,
+      // }
 
-      const [panebrasProducts, zapProducts, panebrasInventory, zapInventory] =
-        await Promise.all([
-          this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
-            BOA_GESTAO_PRODUCTS_URL,
-            {
-              headers: panebrasHeaders,
-            },
-          ),
-          this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
-            BOA_GESTAO_PRODUCTS_URL,
-            {
-              headers: zapHeaders,
-            },
-          ),
-          this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
-            BOA_GESTAO_INVENTORY_URL,
-            {
-              headers: panebrasHeaders,
-            },
-          ),
-          this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
-            BOA_GESTAO_INVENTORY_URL,
-            {
-              headers: zapHeaders,
-            },
-          ),
-        ])
+      // const [panebrasProducts, zapProducts, panebrasInventory, zapInventory] =
+      //   await Promise.all([
+      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
+      //       BOA_GESTAO_PRODUCTS_URL,
+      //       {
+      //         headers: panebrasHeaders,
+      //       },
+      //     ),
+      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoProduct>(
+      //       BOA_GESTAO_PRODUCTS_URL,
+      //       {
+      //         headers: zapHeaders,
+      //       },
+      //     ),
+      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
+      //       BOA_GESTAO_INVENTORY_URL,
+      //       {
+      //         headers: panebrasHeaders,
+      //       },
+      //     ),
+      //     this.httpService.fetchAllBoaGestaoPages<BoaGestaoInventoryItem>(
+      //       BOA_GESTAO_INVENTORY_URL,
+      //       {
+      //         headers: zapHeaders,
+      //       },
+      //     ),
+      //   ])
 
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
       // this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
