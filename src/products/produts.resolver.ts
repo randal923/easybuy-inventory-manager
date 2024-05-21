@@ -7,7 +7,5 @@ export class ProductsResolver {
   constructor(private productsService: ProductsService) {}
 
   @Query(() => [Product])
-  async products() {
-    return this.productsService.getAllProducts()
-  }
+  async products() {}
 }
