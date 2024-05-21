@@ -150,8 +150,8 @@ export class OrdersService {
         continue
       }
 
-      console.log('shopifyProduct', shopifyProduct)
       const isFractioned = shopifyProduct.isFractioned
+
       const productInDb = await this.prismaService.findProductBySku(shopifyProduct.sku)
       const isThereFractionedProductForThisSku =
         await this.prismaService.findProductBySku(`FR-${shopifyProduct.sku}`)

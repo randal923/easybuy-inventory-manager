@@ -74,40 +74,41 @@ export class SchedulerService {
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
       // this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
 
-      const skus = shopifyProductVariants.map((variant) => variant.sku)
-      const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
+      console.log('shopifyProductVariants', shopifyProductVariants)
+      // const skus = shopifyProductVariants.map((variant) => variant.sku)
+      // const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
 
-      const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
+      // const productsInDb = await this.prismaService.findProductsBySkus(validSkus)
 
-      const mergedPanebrasProducts = mergeProductsAndInventory({
-        boaGestaoProducts: panebrasProducts,
-        boaGestaoInventoryRows: panebrasInventory,
-        shopifyProductVariants: shopifyProductVariants,
-        productsInDb,
-      })
+      // const mergedPanebrasProducts = mergeProductsAndInventory({
+      //   boaGestaoProducts: panebrasProducts,
+      //   boaGestaoInventoryRows: panebrasInventory,
+      //   shopifyProductVariants: shopifyProductVariants,
+      //   productsInDb,
+      // })
 
-      const mergedZapProducts = mergeProductsAndInventory({
-        boaGestaoProducts: zapProducts,
-        boaGestaoInventoryRows: zapInventory,
-        shopifyProductVariants: shopifyProductVariants,
-        productsInDb,
-      })
+      // const mergedZapProducts = mergeProductsAndInventory({
+      //   boaGestaoProducts: zapProducts,
+      //   boaGestaoInventoryRows: zapInventory,
+      //   shopifyProductVariants: shopifyProductVariants,
+      //   productsInDb,
+      // })
 
-      const mergedProducts = [...mergedPanebrasProducts, ...mergedZapProducts]
+      // const mergedProducts = [...mergedPanebrasProducts, ...mergedZapProducts]
 
-      if (mergedProducts.length === 0) {
-        this.logger.warn('No products to update.')
-        return
-      }
+      // if (mergedProducts.length === 0) {
+      //   this.logger.warn('No products to update.')
+      //   return
+      // }
 
-      const unduplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
+      // const unduplicatedMergedProducts = removeDuplicates(mergedProducts, 'sku')
 
-      await this.shopifyService.updateProductVariantsPrices(
-        shopifyProductVariants,
-        unduplicatedMergedProducts,
-      )
-      await this.productsService.upsertProduct(unduplicatedMergedProducts)
-      await this.shopifyService.updateStockLevels(unduplicatedMergedProducts)
+      // await this.shopifyService.updateProductVariantsPrices(
+      //   shopifyProductVariants,
+      //   unduplicatedMergedProducts,
+      // )
+      // await this.productsService.upsertProduct(unduplicatedMergedProducts)
+      // await this.shopifyService.updateStockLevels(unduplicatedMergedProducts)
     } catch (error) {
       if (error.response && error.response.status === 429) {
         const retryAfter = error.response.data.time
