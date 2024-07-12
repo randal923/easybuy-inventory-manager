@@ -157,8 +157,6 @@ export class ShopifyService {
           })
         })
 
-        console.log('pageInfo.hasNextPage', pageInfo.hasNextPage)
-
         hasNextPage = pageInfo.hasNextPage
         endCursor = pageInfo.endCursor
       } catch (error) {
