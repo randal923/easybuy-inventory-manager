@@ -74,6 +74,7 @@ export class SchedulerService {
       const shopifyProductVariants = await this.shopifyService.fetchProductsVariants()
       // this.checkForInvalidSkus(shopifyProductVariants, mergedBoaGestaoProducts)
 
+      console.log('fetched all shopify products...')
       const skus = shopifyProductVariants.map((variant) => variant.sku)
       const validSkus = skus.filter((sku) => sku && sku.trim().length > 0)
 

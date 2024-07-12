@@ -126,44 +126,16 @@ export class ShopifyService {
     }
   }
 
-  // async fetchProductsVariants() {
-  //   try {
-  //     const { data }: ShopifyApiResponse = await this.apolloClient.query({
-  //       query: fetchProductsQuery,
-  //     })
-
-  //     const productVariants = data.products.edges.flatMap((edge: ShopifyProductEdge) => {
-  //       const product = edge.node
-  //       const variants = product.variants.edges
-
-  //       return variants.map((variant: VariantEdge) => {
-  //         const variantTitle =
-  //           variant.node.title === 'Default Title' ? product.title : variant.node.title
-
-  //         return {
-  //           ...variant.node,
-  //           title: variantTitle,
-  //         }
-  //       })
-  //     })
-
-  //     return productVariants
-  //   } catch (error) {
-  //     this.logger.error('Error fetching products from Shopify:', error)
-  //     throw new Error('Failed to fetch products from Shopify')
-  //   }
-  // }
-
   async fetchProductsVariants() {
     const allProductVariants: VariantNode[] = []
     let hasNextPage = true
-    let endCursor = null
+    let endCursor: string | null = null
 
     while (hasNextPage) {
       try {
         const response: ShopifyApiResponse = await this.apolloClient.query({
           query: fetchProductsQuery,
-          variables: { after: endCursor },
+          variables: endCursor ? { after: endCursor } : {},
         })
 
         const products = response.data.products.edges
@@ -184,6 +156,8 @@ export class ShopifyService {
             })
           })
         })
+
+        console.log('pageInfo.hasNextPage', pageInfo.hasNextPage)
 
         hasNextPage = pageInfo.hasNextPage
         endCursor = pageInfo.endCursor

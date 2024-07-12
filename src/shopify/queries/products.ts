@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client/core'
 
 export const fetchProductsQuery = gql`
-  {
-    products(first: 200) {
+  query fetchProducts($after: String) {
+    products(first: 200, after: $after) {
       edges {
         node {
           id
